@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PuG Lernzettel — Staat, Grundrechte & Gemeinde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0f1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --gold: #d4a84b;
+    --gold-dim: #9a7733;
+    --accent: #4f8ef7;
+    --green: #3ecf8e;
+    --red: #f06b6b;
+    --text: #e8e4da;
+    --muted: #8a96aa;
+    --border: rgba(212,168,75,0.18);
+    --r: 12px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content:'';
+    position:fixed; inset:0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top:0; left:0; right:0; z-index:100;
+    background: rgba(11,15,26,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 1.5rem;
+    height: 58px; overflow-x: auto;
+  }
+  nav::-webkit-scrollbar { display:none; }
+  .nav-brand {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    font-size: 1.05rem;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  nav a {
+    color: var(--muted); text-decoration:none;
+    font-size: 0.8rem; font-weight:500;
+    white-space: nowrap;
+    transition: color .2s;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  nav a:hover { color: var(--gold); }
+  .nav-sep { color: var(--border); flex-shrink:0; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 8rem 2rem 4rem;
+    position: relative;
+  }
+  .hero-bg {
+    position:absolute; inset:0;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(79,142,247,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(212,168,75,0.06) 0%, transparent 60%);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap:.5rem;
+    background: rgba(212,168,75,0.1);
+    border: 1px solid var(--border);
+    border-radius:100px; padding: .35rem 1rem;
+    font-size:.78rem; color: var(--gold);
+    letter-spacing:.08em; text-transform:uppercase;
+    margin-bottom: 1.5rem;
+    animation: fadeDown .6s ease both;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    line-height: 1.1;
+    color: var(--text);
+    animation: fadeUp .7s .1s ease both;
+  }
+  .hero h1 span { color: var(--gold); }
+  .hero p {
+    max-width: 520px; margin: 1.2rem auto 2.5rem;
+    color: var(--muted); font-size: 1.05rem;
+    animation: fadeUp .7s .2s ease both;
+  }
+  .hero-stats {
+    display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp .7s .3s ease both;
+  }
+  .stat {
+    text-align:center;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 1rem 1.5rem;
+  }
+  .stat-num { font-family:'Playfair Display',serif; font-size:2rem; color:var(--gold); }
+  .stat-lbl { font-size:.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+
+  /* ── SECTIONS ── */
+  section {
+    max-width: 1100px; margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+  .section-label {
+    display: inline-flex; align-items:center; gap:.5rem;
+    color: var(--gold); font-size:.75rem;
+    text-transform:uppercase; letter-spacing:.12em; font-weight:500;
+    margin-bottom:.8rem;
+  }
+  .section-label::before {
+    content:''; width:24px; height:2px; background:var(--gold); border-radius:2px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    line-height:1.15; margin-bottom: 2.5rem;
+    color: var(--text);
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: var(--gold);
+    margin-bottom: .8rem; margin-top: 1.5rem;
+  }
+
+  /* ── REVEAL ANIMATION ── */
+  .reveal {
+    opacity:0; transform:translateY(30px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .reveal.visible { opacity:1; transform:none; }
+  .reveal-delay-1 { transition-delay:.1s; }
+  .reveal-delay-2 { transition-delay:.2s; }
+  .reveal-delay-3 { transition-delay:.3s; }
+  .reveal-delay-4 { transition-delay:.4s; }
+
+  /* ── PRINCIPLE CARDS ── */
+  .principle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.2rem;
+  }
+  .p-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1.4rem;
+    position:relative; overflow:hidden;
+    transition: transform .3s, border-color .3s, box-shadow .3s;
+    cursor:default;
+  }
+  .p-card::before {
+    content:''; position:absolute;
+    top:0; left:0; right:0; height:3px;
+    background: linear-gradient(90deg, var(--gold), var(--accent));
+    opacity:0; transition: opacity .3s;
+  }
+  .p-card:hover { transform:translateY(-4px); border-color:var(--gold-dim); box-shadow:0 12px 40px rgba(0,0,0,.4); }
+  .p-card:hover::before { opacity:1; }
+  .p-icon { font-size:2rem; margin-bottom:.8rem; }
+  .p-title { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--gold); margin-bottom:.5rem; }
+  .p-desc { font-size:.88rem; color:var(--muted); margin-bottom:.8rem; }
+  .p-example { font-size:.8rem; color:var(--accent); background:rgba(79,142,247,.08); border-radius:6px; padding:.3rem .6rem; }
+
+  /* ── GLOW DIVIDER ── */
+  .divider {
+    height:1px; background:linear-gradient(90deg,transparent,var(--border),transparent);
+    margin: 0 2rem;
+  }
+
+  /* ── GRUNDRECHTE TABLE ── */
+  .table-wrap { overflow-x:auto; border-radius:var(--r); border:1px solid var(--border); }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  thead th {
+    background:var(--bg3); color:var(--gold);
+    font-family:'Playfair Display',serif;
+    padding:.9rem 1.2rem; text-align:left;
+    border-bottom:1px solid var(--border);
+    font-weight:600; font-size:.95rem;
+  }
+  tbody tr { border-bottom:1px solid rgba(255,255,255,.04); transition:background .2s; }
+  tbody tr:last-child { border-bottom:none; }
+  tbody tr:hover { background:rgba(212,168,75,.04); }
+  td { padding:.8rem 1.2rem; }
+  td:first-child { color:var(--gold); font-weight:500; font-size:.82rem; white-space:nowrap; }
+  td:nth-child(2) { color:var(--accent); font-weight:500; }
+  .badge-mr { background:rgba(62,207,142,.1); color:var(--green); border-radius:4px; padding:.15rem .5rem; font-size:.72rem; font-weight:600; }
+  .badge-br { background:rgba(79,142,247,.1); color:var(--accent); border-radius:4px; padding:.15rem .5rem; font-size:.72rem; font-weight:600; }
+
+  /* ── GEWALTENTEILUNG VISUAL ── */
+  .gewalt-grid {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1.2rem;
+    margin-bottom:2rem;
+  }
+  @media(max-width:600px) { .gewalt-grid { grid-template-columns:1fr; } }
+  .g-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r); padding:1.5rem; text-align:center;
+    position:relative; overflow:hidden;
+    transition:transform .3s, box-shadow .3s;
+  }
+  .g-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(0,0,0,.5); }
+  .g-card-leg { border-top:3px solid var(--gold); }
+  .g-card-exe { border-top:3px solid var(--accent); }
+  .g-card-jud { border-top:3px solid var(--green); }
+  .g-card .g-icon { font-size:2.5rem; margin-bottom:.8rem; }
+  .g-card .g-fw { font-size:.75rem; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; margin-bottom:.3rem; }
+  .g-card .g-name { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text); margin-bottom:.6rem; }
+  .g-card .g-task { font-size:.85rem; color:var(--muted); margin-bottom:1rem; }
+  .g-examples { text-align:left; }
+  .g-ex { font-size:.8rem; color:var(--text); padding:.25rem 0; border-bottom:1px solid rgba(255,255,255,.05); }
+  .g-ex:last-child { border-bottom:none; }
+
+  .vertical-chain {
+    display:flex; gap:0; flex-direction:row; align-items:stretch;
+    margin-top:1.5rem;
+  }
+  .v-level {
+    flex:1; background:var(--bg2);
+    border:1px solid var(--border); border-radius:var(--r);
+    padding:1.2rem; text-align:center;
+    margin:0 .4rem; position:relative;
+    transition:transform .3s;
+  }
+  .v-level:hover { transform:scale(1.02); }
+  .v-level-title { font-family:'Playfair Display',serif; color:var(--gold); margin-bottom:.5rem; }
+  .v-level-items { font-size:.82rem; color:var(--muted); line-height:1.8; }
+  @media(max-width:500px) { .vertical-chain { flex-direction:column; } .v-level { margin: .4rem 0; } }
+
+  /* ── FOEDERALISMUS ── */
+  .fed-compare {
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;
+  }
+  @media(max-width:640px) { .fed-compare { grid-template-columns:1fr; } }
+  .fed-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r); padding:1.4rem;
+    transition:transform .3s;
+  }
+  .fed-card:hover { transform:translateY(-3px); }
+  .fed-card h4 { font-family:'Playfair Display',serif; color:var(--gold); margin-bottom:.5rem; }
+  .fed-card p { font-size:.87rem; color:var(--muted); margin-bottom:.6rem; }
+  .fed-card .eg { font-size:.8rem; color:var(--accent); }
+  .pros-cons { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.5rem; }
+  @media(max-width:500px) { .pros-cons { grid-template-columns:1fr; } }
+  .pc-box { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); padding:1.3rem; }
+  .pc-box.pro { border-left:3px solid var(--green); }
+  .pc-box.con { border-left:3px solid var(--red); }
+  .pc-title { font-size:.8rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; margin-bottom:.8rem; }
+  .pc-box.pro .pc-title { color:var(--green); }
+  .pc-box.con .pc-title { color:var(--red); }
+  .pc-item { font-size:.85rem; color:var(--muted); padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.05); display:flex; gap:.6rem; }
+  .pc-item:last-child { border-bottom:none; }
+  .pc-item::before { flex-shrink:0; margin-top:.1rem; }
+  .pc-box.pro .pc-item::before { content:'✓'; color:var(--green); }
+  .pc-box.con .pc-item::before { content:'✗'; color:var(--red); }
+
+  /* ── FDGO & EWIGKEIT ── */
+  .fdgo-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:1rem; }
+  .fdgo-item {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r); padding:1rem;
+    display:flex; align-items:flex-start; gap:.8rem;
+    transition:border-color .3s, transform .3s;
+  }
+  .fdgo-item:hover { border-color:var(--gold-dim); transform:translateY(-2px); }
+  .fdgo-num { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--gold); opacity:.4; line-height:1; flex-shrink:0; }
+  .fdgo-text { font-size:.88rem; color:var(--text); }
+
+  /* ── GEMEINDE ── */
+  .aufgaben-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  @media(max-width:640px) { .aufgaben-grid { grid-template-columns:1fr; } }
+  .aufg-card {
+    background:var(--bg2); border:1px solid var(--border);
+    border-radius:var(--r); padding:1.4rem;
+  }
+  .aufg-card h4 { font-family:'Playfair Display',serif; font-size:1.05rem; margin-bottom:.8rem; }
+  .aufg-card.fr h4 { color: #a78bfa; }
+  .aufg-card.pf h4 { color: var(--gold); }
+  .aufg-card.ue h4 { color: var(--accent); }
+  .aufg-list { list-style:none; }
+  .aufg-list li { font-size:.85rem; color:var(--muted); padding:.3rem 0; border-bottom:1px solid rgba(255,255,255,.04); display:flex; gap:.6rem; align-items:center; }
+  .aufg-list li:last-child { border-bottom:none; }
+  .aufg-list li::before { content:'·'; color:var(--gold); font-size:1.2rem; line-height:0; }
+
+  /* ── MERKSATZ BOXES ── */
+  .merksatz {
+    background: linear-gradient(135deg, rgba(212,168,75,.08), rgba(79,142,247,.05));
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: var(--r); padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size:.95rem; color:var(--text);
+    position:relative;
+  }
+  .merksatz::before { content:'💡'; position:absolute; top:-10px; left:1rem; background:var(--bg); padding:0 .4rem; }
+
+  /* ── QUIZ ── */
+  #quiz-section { background:var(--bg2); border-radius:16px; padding:2.5rem; border:1px solid var(--border); }
+  .quiz-header { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:2rem; }
+  .quiz-progress-bar { height:6px; background:rgba(255,255,255,.08); border-radius:3px; margin-bottom:2rem; overflow:hidden; }
+  .quiz-progress-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--accent)); border-radius:3px; transition:width .4s ease; }
+  .quiz-counter { font-size:.85rem; color:var(--muted); }
+  .quiz-score-badge {
+    background:rgba(212,168,75,.1); border:1px solid var(--border);
+    border-radius:100px; padding:.3rem 1rem;
+    font-size:.82rem; color:var(--gold);
+  }
+  .quiz-question {
+    font-family:'Playfair Display',serif;
+    font-size:1.4rem; line-height:1.3;
+    margin-bottom:1.8rem; color:var(--text);
+  }
+  .quiz-options { display:grid; gap:.8rem; margin-bottom:1.5rem; }
+  .quiz-opt {
+    background: var(--bg); border:1px solid var(--border);
+    border-radius: 10px; padding:1rem 1.3rem;
+    cursor:pointer; font-size:.95rem; color:var(--text);
+    transition:all .2s; text-align:left;
+    position:relative; overflow:hidden;
+  }
+  .quiz-opt:hover:not(.disabled) { border-color:var(--gold-dim); background:rgba(212,168,75,.06); transform:translateX(4px); }
+  .quiz-opt.correct { border-color:var(--green); background:rgba(62,207,142,.08); color:var(--green); }
+  .quiz-opt.wrong { border-color:var(--red); background:rgba(240,107,107,.08); color:var(--red); }
+  .quiz-opt.disabled { cursor:default; }
+  .quiz-feedback {
+    min-height:60px; font-size:.9rem;
+    padding:1rem 1.3rem; border-radius:10px;
+    margin-bottom:1.5rem; transition:all .3s;
+    display:none;
+  }
+  .quiz-feedback.show { display:block; }
+  .quiz-feedback.ok { background:rgba(62,207,142,.08); border:1px solid rgba(62,207,142,.2); color:var(--green); }
+  .quiz-feedback.fail { background:rgba(240,107,107,.08); border:1px solid rgba(240,107,107,.2); color:var(--red); }
+  .quiz-btn {
+    background:linear-gradient(135deg,var(--gold),#b8922f);
+    color:#0b0f1a; border:none; border-radius:10px;
+    padding:.85rem 2rem; font-size:.95rem; font-weight:600;
+    cursor:pointer; font-family:'DM Sans',sans-serif;
+    transition:opacity .2s, transform .2s;
+  }
+  .quiz-btn:hover { opacity:.9; transform:translateY(-1px); }
+  .quiz-btn:disabled { opacity:.4; cursor:default; transform:none; }
+  .quiz-result {
+    text-align:center; padding:2rem;
+    display:none;
+  }
+  .quiz-result.show { display:block; }
+  .result-score { font-family:'Playfair Display',serif; font-size:4rem; color:var(--gold); }
+  .result-msg { font-size:1.1rem; color:var(--muted); margin:.5rem 0 1.5rem; }
+
+  /* ── FLASHCARD ── */
+  .flashcard-wrap {
+    perspective:1200px; cursor:pointer;
+    margin:1.5rem 0;
+  }
+  .flashcard {
+    position:relative; height:180px;
+    transform-style:preserve-3d;
+    transition:transform .6s cubic-bezier(.4,.2,.2,1);
+    border-radius:var(--r);
+  }
+  .flashcard.flipped { transform:rotateY(180deg); }
+  .fc-front, .fc-back {
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius:var(--r);
+    display:flex; align-items:center; justify-content:center;
+    padding:2rem; text-align:center;
+  }
+  .fc-front {
+    background: linear-gradient(135deg, var(--bg3), var(--bg2));
+    border:1px solid var(--border);
+    font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text);
+  }
+  .fc-back {
+    background: linear-gradient(135deg, rgba(212,168,75,.1), rgba(79,142,247,.08));
+    border:1px solid var(--gold-dim);
+    transform:rotateY(180deg);
+    font-size:.95rem; color:var(--text);
+  }
+  .fc-hint { font-size:.75rem; color:var(--muted); margin-top:.5rem; letter-spacing:.05em; }
+  .flashcard-nav { display:flex; gap:.8rem; align-items:center; }
+  .fc-nav-btn {
+    background:var(--bg2); border:1px solid var(--border);
+    color:var(--text); border-radius:8px;
+    padding:.5rem 1.2rem; cursor:pointer;
+    font-size:.88rem; transition:all .2s;
+    font-family:'DM Sans',sans-serif;
+  }
+  .fc-nav-btn:hover { border-color:var(--gold); color:var(--gold); }
+  .fc-count { font-size:.85rem; color:var(--muted); flex:1; text-align:center; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align:center; padding:3rem 2rem;
+    color:var(--muted); font-size:.85rem;
+    border-top:1px solid var(--border);
+  }
+
+  /* ── KEYFRAMES ── */
+  @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:none} }
+  @keyframes fadeUp   { from{opacity:0;transform:translateY(24px)}  to{opacity:1;transform:none} }
+  @keyframes pulse    { 0%,100%{opacity:.6} 50%{opacity:1} }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width:6px; height:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+
+  /* ── RESPONSIVE NAV ── */
+  @media(max-width:768px) { nav { gap:1rem; } .nav-brand { font-size:.95rem; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-brand">⚖ PuG</span>
+  <span class="nav-sep">|</span>
+  <a href="#prinzipien">Prinzipien</a>
+  <a href="#grundrechte">Grundrechte</a>
+  <a href="#foederalismus">Föderalismus</a>
+  <a href="#gewaltenteilung">Gewaltenteilung</a>
+  <a href="#fdgo">FDGO</a>
+  <a href="#gemeinde">Gemeinde</a>
+  <a href="#flashcards">Flashcards</a>
+  <a href="#quiz">Quiz</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div style="position:relative;z-index:1">
+    <div class="hero-badge">📚 Schulaufgabe Vorbereitung</div>
+    <h1>Staat, <span>Grundrechte</span> &amp;<br>Gemeinde</h1>
+    <p>Alle wichtigen Themen aus deinem PuG-Skript — kompakt, strukturiert und interaktiv zum Lernen.</p>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">Staatsprinzipien</div></div>
+      <div class="stat"><div class="stat-num">17</div><div class="stat-lbl">Grundrechte</div></div>
+      <div class="stat"><div class="stat-num">16</div><div class="stat-lbl">Bundesländer</div></div>
+      <div class="stat"><div class="stat-num">20</div><div class="stat-lbl">Quizfragen</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- STAATSPRINZIPIEN -->
+<section id="prinzipien">
+  <div class="reveal"><span class="section-label">Art. 20 GG</span></div>
+  <h2 class="reveal reveal-delay-1">Die 5 Staatsprinzipien</h2>
+  <div class="merksatz reveal reveal-delay-2">Deutschland ist ein <strong>demokratischer und sozialer Bundesstaat</strong>. Alle Staatsgewalt geht vom Volke aus. (Art. 20 GG)</div>
+  <div class="principle-grid">
+    <div class="p-card reveal">
+      <div class="p-icon">🗳️</div>
+      <div class="p-title">Demokratie</div>
+      <div class="p-desc">Das Volk entscheidet mit. Regierung kann abgewählt werden.</div>
+      <div class="p-example">Bundestagswahl, Landtagswahl</div>
+    </div>
+    <div class="p-card reveal reveal-delay-1">
+      <div class="p-icon">🤝</div>
+      <div class="p-title">Sozialstaat</div>
+      <div class="p-desc">Der Staat hilft Menschen in Not.</div>
+      <div class="p-example">Bürgergeld, Krankenversicherung</div>
+    </div>
+    <div class="p-card reveal reveal-delay-2">
+      <div class="p-icon">🏛️</div>
+      <div class="p-title">Bundesstaat</div>
+      <div class="p-desc">Deutschland = Bund + 16 Bundesländer mit eigenen Aufgaben.</div>
+      <div class="p-example">Bayern hat eigene Schulpolitik</div>
+    </div>
+    <div class="p-card reveal reveal-delay-3">
+      <div class="p-icon">⚖️</div>
+      <div class="p-title">Rechtsstaat</div>
+      <div class="p-desc">Alle müssen Gesetze beachten — auch der Staat.</div>
+      <div class="p-example">Polizei braucht rechtl. Grundlage</div>
+    </div>
+    <div class="p-card reveal reveal-delay-4">
+      <div class="p-icon">🔀</div>
+      <div class="p-title">Gewaltenteilung</div>
+      <div class="p-desc">Macht wird aufgeteilt, damit niemand zu mächtig wird.</div>
+      <div class="p-example">Bundestag ≠ Regierung ≠ Gerichte</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GRUNDRECHTE -->
+<section id="grundrechte">
+  <div class="reveal"><span class="section-label">Art. 1–19 GG</span></div>
+  <h2 class="reveal reveal-delay-1">Grundrechte, Menschenrechte, Bürgerrechte</h2>
+
+  <div class="merksatz reveal reveal-delay-2">
+    <strong>Menschenrechte</strong> → alle Menschen &nbsp;|&nbsp;
+    <strong>Grundrechte</strong> → im GG geschützt, einklagbar &nbsp;|&nbsp;
+    <strong>Bürgerrechte</strong> → nur deutsche Staatsbürger
+  </div>
+
+  <div class="table-wrap reveal">
+    <table>
+      <thead>
+        <tr><th>Artikel</th><th>Grundrecht</th><th>Erklärung</th><th>Typ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Art. 1 GG</td><td>Menschenwürde</td><td>Jeder Mensch hat unantastbaren Wert</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 2 GG</td><td>Freie Entfaltung</td><td>Jeder darf sein Leben frei gestalten</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 3 GG</td><td>Gleichheit</td><td>Alle Menschen sind vor dem Gesetz gleich</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 4 GG</td><td>Glaubensfreiheit</td><td>Jeder darf seine Religion frei wählen</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 5 GG</td><td>Meinungsfreiheit</td><td>Jeder darf seine Meinung sagen</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 8 GG</td><td>Versammlungsfreiheit</td><td>Menschen dürfen demonstrieren</td><td><span class="badge-br">BR</span></td></tr>
+        <tr><td>Art. 9 GG</td><td>Vereinigungsfreiheit</td><td>Menschen dürfen Vereine gründen</td><td><span class="badge-br">BR</span></td></tr>
+        <tr><td>Art. 10 GG</td><td>Fernmeldegeheimnis</td><td>Private Kommunikation ist geschützt</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 11 GG</td><td>Freizügigkeit</td><td>Überall im Land wohnen dürfen</td><td><span class="badge-br">BR</span></td></tr>
+        <tr><td>Art. 12 GG</td><td>Berufsfreiheit</td><td>Freie Wahl des Berufs</td><td><span class="badge-br">BR</span></td></tr>
+        <tr><td>Art. 13 GG</td><td>Unverletzl. Wohnung</td><td>Wohnung ist besonders geschützt</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 14 GG</td><td>Eigentum</td><td>Eigentum wird geschützt</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 16a GG</td><td>Asylrecht</td><td>Politisch Verfolgte können Schutz bekommen</td><td><span class="badge-mr">MR</span></td></tr>
+        <tr><td>Art. 17 GG</td><td>Petitionsrecht</td><td>Bürger dürfen Bitten an den Staat richten</td><td><span class="badge-br">BR</span></td></tr>
+        <tr><td>Art. 38 GG</td><td>Wahlrecht</td><td>Aktives und passives Wahlrecht</td><td><span class="badge-br">BR</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display:flex;gap:1rem;margin-top:.8rem;font-size:.8rem;color:var(--muted)" class="reveal">
+    <span><span class="badge-mr">MR</span> = Menschenrecht (alle Menschen)</span>
+    <span><span class="badge-br">BR</span> = Bürgerrecht (nur Staatsbürger)</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem">
+    <div class="p-card reveal">
+      <div class="p-title">🛡 Ewigkeitsklausel — Art. 79 Abs. 3 GG</div>
+      <div class="p-desc">Manche Teile des GG dürfen NIEMALS verändert werden. Dazu gehören: Menschenwürde (Art. 1), Demokratie, Rechtsstaat, Sozialstaat, Bundesstaat (Art. 20). Lehre aus der NS-Zeit!</div>
+    </div>
+    <div class="p-card reveal reveal-delay-1">
+      <div class="p-title">🧬 Personalismus im GG</div>
+      <div class="p-desc">Das GG basiert auf dem <strong>Personalismus</strong>: Der Mensch ist frei, aber auch Teil einer Gemeinschaft. Er hat Rechte UND Verantwortung. Nicht reiner Individualismus, nicht Kollektivismus.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FÖDERALISMUS -->
+<section id="foederalismus">
+  <div class="reveal"><span class="section-label">Art. 30 GG</span></div>
+  <h2 class="reveal reveal-delay-1">Föderalismus in Deutschland</h2>
+
+  <div class="fed-compare reveal reveal-delay-2">
+    <div class="fed-card">
+      <h4>🇩🇪 Föderalismus</h4>
+      <p>Macht zwischen Bund und Ländern verteilt. Länder haben eigene Aufgaben.</p>
+      <div class="eg">z.B. Deutschland, USA</div>
+    </div>
+    <div class="fed-card">
+      <h4>🏙️ Zentralismus</h4>
+      <p>Eine zentrale Stelle entscheidet fast alles. Wenig regionale Selbstständigkeit.</p>
+      <div class="eg">z.B. Frankreich</div>
+    </div>
+    <div class="fed-card">
+      <h4>🌐 Staatenbund</h4>
+      <p>Mehrere selbstständige Staaten arbeiten freiwillig zusammen.</p>
+      <div class="eg">z.B. EU, NATO</div>
+    </div>
+  </div>
+
+  <div class="pros-cons reveal">
+    <div class="pc-box pro">
+      <div class="pc-title">✅ Vorteile</div>
+      <div class="pc-item">Macht wird besser kontrolliert</div>
+      <div class="pc-item">Länder können eigene Lösungen finden</div>
+      <div class="pc-item">Politik ist näher an den Bürgern</div>
+      <div class="pc-item">Regionale Traditionen werden beachtet</div>
+    </div>
+    <div class="pc-box con">
+      <div class="pc-title">❌ Nachteile</div>
+      <div class="pc-item">Entscheidungen dauern länger</div>
+      <div class="pc-item">Unterschiedliche Regeln in Ländern</div>
+      <div class="pc-item">Unklar, wer verantwortlich ist</div>
+      <div class="pc-item">Streit zwischen Bund und Ländern</div>
+    </div>
+  </div>
+
+  <div class="merksatz reveal">Warum Föderalismus? Nach der NS-Zeit wollte man verhindern, dass zu viel Macht zentral liegt. <strong>Lektion aus der Geschichte.</strong></div>
+
+  <h3 class="reveal">Aufgabenverteilung Bund / Länder</h3>
+  <div class="table-wrap reveal">
+    <table>
+      <thead><tr><th>Bereich</th><th>Ausschließlich Bund</th><th>Konkurrierende Gesetzgebung</th><th>Schwerpunkt Länder</th></tr></thead>
+      <tbody>
+        <tr><td>Gesetzgebung</td><td>Verteidigung, Währung, Außenpolitik</td><td>Strafrecht, Sozialversicherung, Straßenverkehr</td><td>Schule, Polizei, Kultur</td></tr>
+        <tr><td>Verwaltung</td><td>Bundespolizei</td><td>—</td><td>Landespolizei, Schulen</td></tr>
+        <tr><td>Rechtsprechung</td><td>BGH, BVerfG</td><td>—</td><td>Amtsgericht, Landgericht</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GEWALTENTEILUNG -->
+<section id="gewaltenteilung">
+  <div class="reveal"><span class="section-label">Machtkontrolle</span></div>
+  <h2 class="reveal reveal-delay-1">Gewaltenteilung</h2>
+  <div class="merksatz reveal">Gewaltenteilung dient der <strong>Machtkontrolle</strong>. Niemand soll zu viel Macht haben.</div>
+
+  <h3 class="reveal">Horizontale Gewaltenteilung</h3>
+  <div class="gewalt-grid">
+    <div class="g-card g-card-leg reveal">
+      <div class="g-icon">📜</div>
+      <div class="g-fw">Legislative</div>
+      <div class="g-name">Gesetzgebende Gewalt</div>
+      <div class="g-task">Macht Gesetze</div>
+      <div class="g-examples">
+        <div class="g-ex">Bundestag</div>
+        <div class="g-ex">Bundesrat</div>
+        <div class="g-ex">Landtag</div>
+        <div class="g-ex">Gemeinderat</div>
+      </div>
+    </div>
+    <div class="g-card g-card-exe reveal reveal-delay-1">
+      <div class="g-icon">🏛️</div>
+      <div class="g-fw">Exekutive</div>
+      <div class="g-name">Ausführende Gewalt</div>
+      <div class="g-task">Führt Gesetze aus</div>
+      <div class="g-examples">
+        <div class="g-ex">Bundesregierung</div>
+        <div class="g-ex">Verwaltung</div>
+        <div class="g-ex">Polizei</div>
+        <div class="g-ex">Bürgermeister</div>
+      </div>
+    </div>
+    <div class="g-card g-card-jud reveal reveal-delay-2">
+      <div class="g-icon">⚖️</div>
+      <div class="g-fw">Judikative</div>
+      <div class="g-name">Rechtsprechende Gewalt</div>
+      <div class="g-task">Entscheidet über Recht</div>
+      <div class="g-examples">
+        <div class="g-ex">Bundesverfassungsgericht</div>
+        <div class="g-ex">Oberlandesgericht</div>
+        <div class="g-ex">Landgericht</div>
+        <div class="g-ex">Amtsgericht</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:2rem">Vertikale Gewaltenteilung</h3>
+  <div class="vertical-chain reveal">
+    <div class="v-level" style="border-top:3px solid var(--gold)">
+      <div class="v-level-title">🇩🇪 Bund</div>
+      <div class="v-level-items">Bundestag<br>Bundesrat<br>Bundesregierung<br>BVerfG</div>
+    </div>
+    <div class="v-level" style="border-top:3px solid var(--accent)">
+      <div class="v-level-title">🏴 Länder</div>
+      <div class="v-level-items">Landtag<br>Landesregierung<br>Amtsgericht<br>Landgericht</div>
+    </div>
+    <div class="v-level" style="border-top:3px solid var(--green)">
+      <div class="v-level-title">🏘️ Kommunen</div>
+      <div class="v-level-items">Gemeinderat<br>Bürgermeister<br>Stadtverwaltung<br>Kreistag</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FDGO + WEHRHAFTE DEMOKRATIE -->
+<section id="fdgo">
+  <div class="reveal"><span class="section-label">Demokratieschutz</span></div>
+  <h2 class="reveal reveal-delay-1">FDGO &amp; Wehrhafte Demokratie</h2>
+
+  <h3 class="reveal">Bestandteile der FDGO</h3>
+  <div class="fdgo-grid reveal">
+    <div class="fdgo-item"><div class="fdgo-num">01</div><div class="fdgo-text">Menschenwürde</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">02</div><div class="fdgo-text">Volkssouveränität</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">03</div><div class="fdgo-text">Demokratie &amp; freie Wahlen</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">04</div><div class="fdgo-text">Mehrparteienprinzip</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">05</div><div class="fdgo-text">Gewaltenteilung</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">06</div><div class="fdgo-text">Rechtsstaat</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">07</div><div class="fdgo-text">Unabhängige Gerichte</div></div>
+    <div class="fdgo-item"><div class="fdgo-num">08</div><div class="fdgo-text">Verantwortlichkeit der Regierung</div></div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:2rem">Mittel der wehrhaften Demokratie</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem" class="reveal">
+    <div class="p-card">
+      <div class="p-icon">🚫</div>
+      <div class="p-title">Parteiverbot</div>
+      <div class="p-desc">Parteien können verboten werden, wenn sie gegen die FDGO kämpfen (z.B. BVerfG-Entscheidung)</div>
+    </div>
+    <div class="p-card">
+      <div class="p-icon">📋</div>
+      <div class="p-title">Grundrechtsverwirkung</div>
+      <div class="p-desc">Art. 18 GG: Wer Grundrechte gegen die FDGO missbraucht, kann sie verlieren.</div>
+    </div>
+    <div class="p-card">
+      <div class="p-icon">🔒</div>
+      <div class="p-title">Ewigkeitsklausel</div>
+      <div class="p-desc">Art. 79 Abs. 3 GG: Menschenwürde und Staatsprinzipien dürfen nie abgeschafft werden.</div>
+    </div>
+    <div class="p-card">
+      <div class="p-icon">✊</div>
+      <div class="p-title">Widerstandsrecht</div>
+      <div class="p-desc">Art. 20 Abs. 4 GG: Bürger dürfen im äußersten Notfall Widerstand leisten. Letztes Mittel!</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GEMEINDE -->
+<section id="gemeinde">
+  <div class="reveal"><span class="section-label">Art. 28 Abs. 2 GG</span></div>
+  <h2 class="reveal reveal-delay-1">Politische Gemeinde &amp; Kommune</h2>
+  <div class="merksatz reveal">Gemeinden haben das Recht, Angelegenheiten der <strong>örtlichen Gemeinschaft in eigener Verantwortung</strong> zu regeln. (Art. 28 Abs. 2 GG)</div>
+
+  <h3 class="reveal">Aufgaben der Gemeinde</h3>
+  <div class="aufgaben-grid reveal">
+    <div class="aufg-card fr">
+      <h4>🎨 Freiwillige Aufgaben</h4>
+      <ul class="aufg-list">
+        <li>Schwimmbad</li>
+        <li>Sportanlagen</li>
+        <li>Bücherei / Museum</li>
+        <li>Theater</li>
+        <li>Parks &amp; Jugendzentrum</li>
+      </ul>
+      <div style="margin-top:.8rem;font-size:.78rem;color:var(--muted)">Kann gespart werden bei Geldmangel</div>
+    </div>
+    <div class="aufg-card pf">
+      <h4>✅ Pflichtaufgaben</h4>
+      <ul class="aufg-list">
+        <li>Schulen &amp; Kindergärten</li>
+        <li>Wasserversorgung</li>
+        <li>Abwasser &amp; Straßen</li>
+        <li>Feuerwehr</li>
+        <li>Bauleitplanung</li>
+      </ul>
+      <div style="margin-top:.8rem;font-size:.78rem;color:var(--muted)">Muss gemacht werden, mit eigenem Spielraum</div>
+    </div>
+    <div class="aufg-card ue">
+      <h4>📋 Übertragener Wirkungskreis</h4>
+      <ul class="aufg-list">
+        <li>Passwesen &amp; Meldewesen</li>
+        <li>Wahlen organisieren</li>
+        <li>Standesamt</li>
+        <li>Gesundheitsamt</li>
+        <li>Bauaufsicht</li>
+      </ul>
+      <div style="margin-top:.8rem;font-size:.78rem;color:var(--muted)">Von Bund/Land übertragen, kaum Spielraum</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem">
+    <div class="reveal">
+      <h3>Gemeinderat</h3>
+      <div class="p-card">
+        <div class="p-desc">Wird von Bürgern gewählt (6 Jahre). Kein Parlament — sondern <strong>Verwaltungsorgan</strong>. Tagt meistens öffentlich.</div>
+        <div class="p-example" style="margin-top:.8rem">Beschließt Haushalt · Bauprojekte · kontrolliert Verwaltung</div>
+      </div>
+    </div>
+    <div class="reveal reveal-delay-1">
+      <h3>Bürgermeister</h3>
+      <div class="p-card">
+        <div class="p-desc">Chef der Verwaltung. Leitet und beruft Sitzungen ein, setzt Beschlüsse um, vertritt Gemeinde nach außen.</div>
+        <div class="p-example" style="margin-top:.8rem">Kann dringliche Anordnungen treffen</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="reveal" style="margin-top:2rem">Bürgerbeteiligung</h3>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem" class="reveal">
+    <div class="fdgo-item"><div class="fdgo-num">🗳</div><div class="fdgo-text"><strong>Kommunalwahl</strong><br><span style="font-size:.78rem;color:var(--muted)">Wahl von Gemeinderat &amp; Bürgermeister</span></div></div>
+    <div class="fdgo-item"><div class="fdgo-num">📣</div><div class="fdgo-text"><strong>Bürgerversammlung</strong><br><span style="font-size:.78rem;color:var(--muted)">Informiert, Fragen stellen</span></div></div>
+    <div class="fdgo-item"><div class="fdgo-num">✍️</div><div class="fdgo-text"><strong>Bürgerbegehren</strong><br><span style="font-size:.78rem;color:var(--muted)">Antrag auf Abstimmung</span></div></div>
+    <div class="fdgo-item"><div class="fdgo-num">☑️</div><div class="fdgo-text"><strong>Bürgerentscheid</strong><br><span style="font-size:.78rem;color:var(--muted)">Die Abstimmung selbst</span></div></div>
+    <div class="fdgo-item"><div class="fdgo-num">📝</div><div class="fdgo-text"><strong>Panaschieren</strong><br><span style="font-size:.78rem;color:var(--muted)">Kandidaten aus versch. Listen wählen</span></div></div>
+    <div class="fdgo-item"><div class="fdgo-num">✖️3</div><div class="fdgo-text"><strong>Kumulieren</strong><br><span style="font-size:.78rem;color:var(--muted)">Einer Person bis zu 3 Stimmen geben</span></div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FLASHCARDS -->
+<section id="flashcards">
+  <div class="reveal"><span class="section-label">Lernmodus</span></div>
+  <h2 class="reveal reveal-delay-1">Flashcards — Klicke zum Umdrehen</h2>
+
+  <div class="flashcard-wrap reveal" id="fc-wrap" onclick="flipCard()">
+    <div class="flashcard" id="flashcard">
+      <div class="fc-front" id="fc-front">
+        <div>
+          <div id="fc-q">Was bedeutet Föderalismus?</div>
+          <div class="fc-hint">👆 Klicken für Antwort</div>
+        </div>
+      </div>
+      <div class="fc-back" id="fc-back">
+        <div id="fc-a">Deutschland besteht aus Bund und 16 Bundesländern. Die Länder haben eigene Aufgaben und politische Gestaltungsmöglichkeiten, z.B. in Schule, Polizei und Kultur.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flashcard-nav reveal">
+    <button class="fc-nav-btn" onclick="prevCard()">← Zurück</button>
+    <div class="fc-count" id="fc-count">1 / 12</div>
+    <button class="fc-nav-btn" onclick="nextCard()">Weiter →</button>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="reveal"><span class="section-label">Schnelltest</span></div>
+  <h2 class="reveal reveal-delay-1">Interaktiver Quiz</h2>
+  <div id="quiz-section" class="reveal">
+    <div id="quiz-main">
+      <div class="quiz-header">
+        <div class="quiz-counter" id="q-counter">Frage 1 von 15</div>
+        <div class="quiz-score-badge" id="q-score">Punkte: 0</div>
+      </div>
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="q-fill" style="width:0%"></div></div>
+      <div class="quiz-question" id="q-question"></div>
+      <div class="quiz-options" id="q-options"></div>
+      <div class="quiz-feedback" id="q-feedback"></div>
+      <button class="quiz-btn" id="q-next" onclick="nextQuestion()" disabled>Nächste Frage →</button>
+    </div>
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-score" id="result-score">0/15</div>
+      <div class="result-msg" id="result-msg"></div>
+      <button class="quiz-btn" onclick="restartQuiz()">🔄 Nochmal versuchen</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--gold);margin-bottom:.5rem">Viel Erfolg bei der Schulaufgabe! 🎓</p>
+  <p>PuG Lernzettel — Staat, Grundrechte &amp; Gemeinde</p>
+</footer>
+
+<script>
+// ── REVEAL ON SCROLL ──
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+// ── FLASHCARDS ──
+const cards = [
+  { q: "Was bedeutet Föderalismus?", a: "Deutschland besteht aus Bund und 16 Bundesländern. Die Länder haben eigene Aufgaben und pol. Gestaltungsmöglichkeiten, z.B. in Schule, Polizei, Kultur." },
+  { q: "Was schützt die Ewigkeitsklausel? (Art. 79 Abs. 3 GG)", a: "Menschenwürde (Art. 1) und die Staatsprinzipien aus Art. 20 GG: Demokratie, Rechtsstaat, Sozialstaat und Bundesstaat. Diese dürfen NIEMALS abgeschafft werden." },
+  { q: "Was bedeutet FDGO?", a: "Freiheitlich-demokratische Grundordnung. Beinhaltet: Menschenwürde, Volkssouveränität, Demokratie, Mehrparteienprinzip, Gewaltenteilung, Rechtsstaat, unabhängige Gerichte." },
+  { q: "Was ist der Unterschied zwischen horizontaler und vertikaler Gewaltenteilung?", a: "Horizontal = Legislative, Exekutive, Judikative (Machtteilung auf gleicher Ebene). Vertikal = Bund, Länder, Gemeinden (Machtteilung auf verschiedenen Ebenen)." },
+  { q: "Was bedeutet Rechtsstaat?", a: "Der Staat ist an Recht und Gesetz gebunden. Er darf nicht willkürlich handeln. Bürger können vor Gericht gehen. Gerichte sind unabhängig. Das Recht steht über der Macht." },
+  { q: "Was ist der Unterschied: Menschenrecht vs. Bürgerrecht?", a: "Menschenrechte gelten für ALLE Menschen (unabhängig von Nationalität). Bürgerrechte gelten nur für deutsche Staatsbürger, z.B. Wahlrecht, Freizügigkeit, Berufsfreiheit." },
+  { q: "Was bedeutet Panaschieren bei der Kommunalwahl?", a: "Man kann Kandidaten aus verschiedenen Parteien / Listen wählen. Man ist nicht an eine Partei gebunden." },
+  { q: "Was bedeutet Kumulieren bei der Kommunalwahl?", a: "Man kann einer einzelnen Person mehrere Stimmen geben — bis zu 3 Stimmen. Man zeigt damit starke Unterstützung für eine konkrete Person." },
+  { q: "Was ist der Unterschied zwischen Bürgerbegehren und Bürgerentscheid?", a: "Bürgerbegehren = Antrag von Bürgern, über ein Thema abstimmen zu wollen (Unterschriften sammeln). Bürgerentscheid = die eigentliche Abstimmung selbst." },
+  { q: "Was sind die drei Aufgabenarten der Gemeinde?", a: "1) Freiwillige Aufgaben (z.B. Schwimmbad, Theater). 2) Pflichtaufgaben (z.B. Schulen, Feuerwehr). 3) Übertragener Wirkungskreis (z.B. Passwesen, Wahlen, Standesamt)." },
+  { q: "Was bedeutet wehrhafte Demokratie?", a: "Die Demokratie darf sich gegen ihre Feinde verteidigen. Mittel: Parteiverbot, Grundrechtsverwirkung (Art. 18), Ewigkeitsklausel (Art. 79 III), Widerstandsrecht (Art. 20 IV)." },
+  { q: "Welches Menschenbild liegt dem Grundgesetz zugrunde?", a: "Personalismus: Der Mensch ist frei und hat eigene Rechte, aber auch Verantwortung gegenüber der Gemeinschaft. Weder reiner Individualismus noch Kollektivismus." },
+];
+
+let fcIdx = 0, fcFlipped = false;
+
+function showCard(idx) {
+  const c = cards[idx];
+  document.getElementById('fc-q').textContent = c.q;
+  document.getElementById('fc-a').textContent = c.a;
+  document.getElementById('fc-count').textContent = `${idx+1} / ${cards.length}`;
+  const fc = document.getElementById('flashcard');
+  fc.classList.remove('flipped');
+  fcFlipped = false;
+}
+
+function flipCard() {
+  const fc = document.getElementById('flashcard');
+  fcFlipped = !fcFlipped;
+  fc.classList.toggle('flipped', fcFlipped);
+}
+
+function nextCard() {
+  fcIdx = (fcIdx + 1) % cards.length;
+  showCard(fcIdx);
+}
+
+function prevCard() {
+  fcIdx = (fcIdx - 1 + cards.length) % cards.length;
+  showCard(fcIdx);
+}
+
+showCard(0);
+
+// ── QUIZ ──
+const questions = [
+  { q: "Was ist die wichtigste Aussage von Art. 20 GG?", opts: ["Deutschland ist ein demokratischer und sozialer Bundesstaat", "Jeder Mensch hat Würde", "Alle Grundrechte sind unveränderlich", "Deutschland hat 16 Bundesländer"], ans: 0, exp: "Art. 20 GG: 'Deutschland ist ein demokratischer und sozialer Bundesstaat. Alle Staatsgewalt geht vom Volke aus.'" },
+  { q: "Was gehört NICHT zur FDGO?", opts: ["Menschenwürde", "Volkssouveränität", "Mehrparteienprinzip", "Schulpflicht"], ans: 3, exp: "Schulpflicht ist kein Bestandteil der FDGO. Zur FDGO gehören u.a. Menschenwürde, Demokratie, Gewaltenteilung und Rechtsstaat." },
+  { q: "Was bedeutet die Ewigkeitsklausel (Art. 79 Abs. 3 GG)?", opts: ["Das GG gilt ewig, kann aber verändert werden", "Art. 1 und Art. 20 GG dürfen niemals abgeschafft werden", "Grundrechte können niemals eingeschränkt werden", "Gesetze gelten für immer"], ans: 1, exp: "Die Ewigkeitsklausel schützt Menschenwürde (Art. 1) und die Staatsprinzipien (Art. 20 GG) vor Abschaffung — als Lehre aus der NS-Zeit." },
+  { q: "Welche Gewalt ist für die Gesetzgebung zuständig?", opts: ["Exekutive", "Judikative", "Legislative", "Bürokratie"], ans: 2, exp: "Legislative = gesetzgebende Gewalt (Bundestag, Bundesrat, Landtag, Gemeinderat). Exekutive führt aus, Judikative entscheidet." },
+  { q: "Was ist vertikale Gewaltenteilung?", opts: ["Aufteilung in Legislative, Exekutive, Judikative", "Aufteilung zwischen Bund, Ländern und Gemeinden", "Trennung von Staat und Kirche", "Aufteilung der Ministerien"], ans: 1, exp: "Vertikal = Machtteilung auf verschiedenen Ebenen: Bund → Länder → Gemeinden. Horizontal = Leg./Ex./Jud." },
+  { q: "Was sind Bürgerrechte?", opts: ["Rechte, die alle Menschen haben", "Rechte, die nur deutschen Staatsbürgern zustehen", "Alle Grundrechte zusammen", "Rechte der Gemeinderäte"], ans: 1, exp: "Bürgerrechte gelten nur für deutsche Staatsbürger, z.B. Wahlrecht (Art. 38), Freizügigkeit (Art. 11), Berufsfreiheit (Art. 12)." },
+  { q: "Was bedeutet Föderalismus?", opts: ["Ein zentraler Staat ohne Regionen", "Zusammenschluss unabhängiger Staaten", "Machtverteilung zwischen Bund und Ländern", "Direkte Demokratie in Gemeinden"], ans: 2, exp: "Föderalismus = Macht zwischen Bund und Bundesländern verteilt. Länder haben eigene Aufgaben, z.B. Schule, Polizei, Kultur." },
+  { q: "Was ist Grundrechtsverwirkung nach Art. 18 GG?", opts: ["Alle Grundrechte werden abgeschafft", "Eine Person verliert Grundrechte, wenn sie sie gegen die FDGO missbraucht", "Der Staat verliert seine Grundrechte", "Grundrechte können nicht mehr eingeklagt werden"], ans: 1, exp: "Art. 18 GG: Wer Grundrechte (z.B. Meinungsfreiheit) zum Kampf gegen die FDGO missbraucht, kann diese Grundrechte verlieren." },
+  { q: "Was bedeutet Panaschieren bei der Kommunalwahl?", opts: ["Einer Person mehrere Stimmen geben", "Ungültig wählen", "Kandidaten aus verschiedenen Parteien wählen", "Briefwahl nutzen"], ans: 2, exp: "Panaschieren = man darf Kandidaten aus unterschiedlichen Parteien/Listen wählen. Man ist nicht an eine Partei gebunden." },
+  { q: "Welche Aufgabe ist ein Pflichtaufgabe der Gemeinde?", opts: ["Schwimmbad bauen", "Theater betreiben", "Feuerwehr unterhalten", "Jugendzentrum eröffnen"], ans: 2, exp: "Feuerwehr ist eine Pflichtaufgabe — die Gemeinde MUSS sie erfüllen. Schwimmbad, Theater, Jugendzentrum sind freiwillige Aufgaben." },
+  { q: "Was steht in Art. 28 Abs. 2 GG?", opts: ["Das Wahlrecht der Bürger", "Das Selbstverwaltungsrecht der Gemeinden", "Das Recht auf Bildung", "Die Aufgaben des Bundesrats"], ans: 1, exp: "Art. 28 Abs. 2 GG: Gemeinden haben das Recht, Angelegenheiten der örtlichen Gemeinschaft in eigener Verantwortung zu regeln." },
+  { q: "Was ist beim Widerstandsrecht (Art. 20 Abs. 4 GG) wichtig?", opts: ["Es darf jederzeit eingesetzt werden", "Es gilt nur für Politiker", "Es ist das letzte Mittel — nur wenn alle anderen Mittel versagen", "Es erlaubt Gewalt gegen den Staat"], ans: 2, exp: "Das Widerstandsrecht ist das LETZTE Mittel. Es gilt nur, wenn jemand die Demokratie beseitigen will UND alle anderen Mittel (Gerichte, Wahlen etc.) versagt haben." },
+  { q: "Welches Menschenbild liegt dem Grundgesetz am besten zugrunde?", opts: ["Individualismus", "Kollektivismus", "Personalismus", "Liberalismus"], ans: 2, exp: "Personalismus: Der Mensch ist frei (Grundrechte) aber auch Teil einer Gemeinschaft (Verantwortung). Weder purer Individualismus noch Kollektivismus." },
+  { q: "Was ist der Unterschied zwischen dem Gemeinderat und dem Bürgermeister?", opts: ["Beide machen dasselbe", "Gemeinderat entscheidet, Bürgermeister führt aus", "Bürgermeister entscheidet, Gemeinderat führt aus", "Gemeinderat wird vom Bürgermeister ernannt"], ans: 1, exp: "Gemeinderat = gewähltes Beschlussorgan, entscheidet über wichtige Angelegenheiten. Bürgermeister = Chef der Verwaltung, führt Beschlüsse aus." },
+  { q: "Was ist ausschließliche Gesetzgebung des Bundes?", opts: ["Schule und Bildung", "Verteidigung, Währung, Außenpolitik", "Polizei und innere Sicherheit", "Kulturförderung"], ans: 1, exp: "Ausschließliche Bundesgesetzgebung: Verteidigung, Staatsangehörigkeit, Währung, auswärtige Angelegenheiten, Bundespolizei. Hier darf NUR der Bund Gesetze machen." },
+];
+
+let qIdx = 0, score = 0, answered = false;
+
+function renderQ() {
+  const q = questions[qIdx];
+  document.getElementById('q-counter').textContent = `Frage ${qIdx+1} von ${questions.length}`;
+  document.getElementById('q-fill').style.width = `${(qIdx/questions.length)*100}%`;
+  document.getElementById('q-question').textContent = q.q;
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = o;
+    btn.onclick = () => selectOpt(i);
+    opts.appendChild(btn);
+  });
+  document.getElementById('q-feedback').className = 'quiz-feedback';
+  document.getElementById('q-feedback').textContent = '';
+  const nb = document.getElementById('q-next');
+  nb.disabled = true;
+  nb.textContent = qIdx < questions.length-1 ? 'Nächste Frage →' : 'Ergebnis anzeigen';
+  answered = false;
+}
+
+function selectOpt(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qIdx];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('q-feedback');
+  if (i === q.ans) {
+    opts[i].classList.add('correct');
+    score++;
+    document.getElementById('q-score').textContent = `Punkte: ${score}`;
+    fb.className = 'quiz-feedback show ok';
+    fb.textContent = '✓ Richtig! ' + q.exp;
+  } else {
+    opts[i].classList.add('wrong');
+    opts[q.ans].classList.add('correct');
+    fb.className = 'quiz-feedback show fail';
+    fb.textContent = '✗ Falsch. ' + q.exp;
+  }
+  document.getElementById('q-next').disabled = false;
+}
+
+function nextQuestion() {
+  qIdx++;
+  if (qIdx >= questions.length) showResult();
+  else renderQ();
+}
+
+function showResult() {
+  document.getElementById('quiz-main').style.display='none';
+  const r = document.getElementById('quiz-result');
+  r.className = 'quiz-result show';
+  document.getElementById('result-score').textContent = `${score}/${questions.length}`;
+  const pct = score/questions.length;
+  document.getElementById('result-msg').textContent = pct >= .9 ? '🏆 Ausgezeichnet! Du bist bereit für die Schulaufgabe!' : pct >= .7 ? '👍 Gut! Noch ein paar Runden und du bist top.' : pct >= .5 ? '📖 Nicht schlecht — nochmal durch die Merksätze!' : '💪 Weitermachen — lies nochmal die Lernzettel durch!';
+}
+
+function restartQuiz() {
+  qIdx = 0; score = 0;
+  document.getElementById('q-score').textContent = 'Punkte: 0';
+  document.getElementById('quiz-result').className = 'quiz-result';
+  document.getElementById('quiz-main').style.display='block';
+  renderQ();
+}
+
+renderQ();
+</script>
+</body>
+</html>
