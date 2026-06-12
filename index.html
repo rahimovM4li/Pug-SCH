@@ -1,1216 +1,817 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>BGP Lernzettel - Schulaufgabe LF6</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-light: #dbeafe;
-            --primary-dark: #1d4ed8;
-            --secondary: #7c3aed;
-            --secondary-light: #ede9fe;
-            --success: #059669;
-            --success-light: #d1fae5;
-            --warning: #d97706;
-            --warning-light: #fef3c7;
-            --danger: #dc2626;
-            --danger-light: #fee2e2;
-            --dark: #1e293b;
-            --gray: #64748b;
-            --light: #f8fafc;
-            --border: #e2e8f0;
-            --radius: 1rem;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lernzettel · Schulaufgabe Elektrotechnik · MQTT · Linux · Raspberry Pi · Docker</title>
+<style>
+  :root{
+    --bg:#f7f7f4; --card:#ffffff; --ink:#1c2430; --muted:#5d6678; --line:#e4e6ec;
+    --et:#c2410c;  --et-soft:#fff1e8;
+    --mq:#6d28d9;  --mq-soft:#f3eeff;
+    --lx:#047857;  --lx-soft:#e9f7f1;
+    --pi:#be123c;  --pi-soft:#fdeef1;
+    --dk:#1d4ed8;  --dk-soft:#eaf0fe;
+    --qz:#0f172a;  --qz-soft:#eef1f6;
+    --mono:ui-monospace,'Cascadia Code','JetBrains Mono',Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+  .wrap{max-width:880px;margin:0 auto;padding:0 14px 70px}
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+  header.hero{padding:26px 0 14px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(24px,5.6vw,34px);line-height:1.15;margin:6px 0 8px;letter-spacing:-.01em}
+  .hero p{margin:0;color:var(--muted);font-size:14.5px}
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 1.5rem;
-            color: var(--dark);
-            line-height: 1.7;
-            font-size: 16px;
-        }
+  nav.chips{position:sticky;top:0;z-index:40;display:flex;gap:8px;overflow-x:auto;
+    padding:10px 14px;margin:10px -14px 0;background:rgba(247,247,244,.94);
+    backdrop-filter:blur(6px);border-bottom:1px solid var(--line);scrollbar-width:none}
+  nav.chips::-webkit-scrollbar{display:none}
+  nav.chips a{flex:0 0 auto;text-decoration:none;font-size:13px;font-weight:600;
+    padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);color:var(--ink);background:#fff;white-space:nowrap}
+  nav.chips a.c-et{border-color:var(--et);color:var(--et)}
+  nav.chips a.c-mq{border-color:var(--mq);color:var(--mq)}
+  nav.chips a.c-lx{border-color:var(--lx);color:var(--lx)}
+  nav.chips a.c-pi{border-color:var(--pi);color:var(--pi)}
+  nav.chips a.c-dk{border-color:var(--dk);color:var(--dk)}
+  nav.chips a.c-qz{border-color:var(--qz);color:var(--qz)}
 
-        .container { max-width: 1100px; margin: 0 auto; }
+  section{margin-top:34px;scroll-margin-top:64px}
+  .sec-head{display:flex;align-items:baseline;gap:10px;border-left:6px solid var(--acc,#999);
+    padding-left:12px;margin-bottom:4px}
+  .sec-head .num{font-family:var(--mono);font-size:13px;color:var(--acc,#999);font-weight:700}
+  h2{font-size:clamp(20px,4.6vw,26px);margin:0;letter-spacing:-.01em}
+  .sec-sub{margin:2px 0 0 18px;color:var(--muted);font-size:14px}
 
-        /* HEADER */
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 1.5rem;
-            padding: 2rem 1rem;
-        }
-        .header h1 { font-size: clamp(1.8rem, 5vw, 2.8rem); margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header .subtitle { font-size: clamp(1rem, 3vw, 1.3rem); opacity: 0.9; }
-        .header .exam-info {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            background: rgba(255,255,255,0.2); padding: 0.5rem 1.5rem;
-            border-radius: 2rem; margin-top: 1rem; backdrop-filter: blur(10px);
-            font-size: clamp(0.85rem, 2.5vw, 1rem);
-        }
+  #elektro{--acc:var(--et);--soft:var(--et-soft)}
+  #mqtt{--acc:var(--mq);--soft:var(--mq-soft)}
+  #linux{--acc:var(--lx);--soft:var(--lx-soft)}
+  #raspi{--acc:var(--pi);--soft:var(--pi-soft)}
+  #docker{--acc:var(--dk);--soft:var(--dk-soft)}
+  #quiz{--acc:var(--qz);--soft:var(--qz-soft)}
 
-        /* NAVIGATION */
-        .nav-bar {
-            background: white; border-radius: var(--radius); padding: 1rem;
-            margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center;
-            position: sticky; top: 0.5rem; z-index: 100;
-        }
-        .nav-bar a {
-            text-decoration: none; padding: 0.5rem 0.9rem; border-radius: 0.5rem;
-            font-size: 0.8rem; font-weight: 600; transition: all 0.2s; white-space: nowrap;
-        }
-        .nav-bar a:nth-child(1) { background: var(--primary-light); color: var(--primary); }
-        .nav-bar a:nth-child(2) { background: var(--secondary-light); color: var(--secondary); }
-        .nav-bar a:nth-child(3) { background: var(--success-light); color: var(--success); }
-        .nav-bar a:nth-child(4) { background: var(--warning-light); color: var(--warning); }
-        .nav-bar a:nth-child(5) { background: var(--danger-light); color: var(--danger); }
-        .nav-bar a:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:14px 0}
+  .card h3{margin:0 0 10px;font-size:17px;display:flex;align-items:center;gap:8px}
+  .card h3::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--acc);flex:0 0 auto}
+  .card h4{margin:14px 0 6px;font-size:15px}
+  .card p{margin:8px 0}
+  ul,ol{margin:8px 0;padding-left:22px}
+  li{margin:4px 0}
+  small,.small{font-size:13px;color:var(--muted)}
 
-        /* SECTIONS */
-        .section {
-            background: white; border-radius: var(--radius); padding: 1.5rem;
-            margin-bottom: 1.5rem; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.12);
-            border-top: 5px solid var(--primary); overflow: hidden;
-        }
-        .section.purple { border-top-color: var(--secondary); }
-        .section.green { border-top-color: var(--success); }
-        .section.orange { border-top-color: var(--warning); }
-        .section.red { border-top-color: var(--danger); }
-        .section.pink { border-top-color: #ec4899; }
+  .formula{font-family:var(--mono);font-size:15px;background:var(--soft);
+    border:1px solid color-mix(in srgb,var(--acc) 28%,transparent);
+    border-radius:10px;padding:10px 12px;margin:8px 0;overflow-x:auto}
+  .merk{border-left:4px solid var(--acc);background:var(--soft);border-radius:0 10px 10px 0;
+    padding:10px 12px;margin:10px 0;font-size:14.5px}
+  .warn{border-left:4px solid #b91c1c;background:#fdeeee;border-radius:0 10px 10px 0;padding:10px 12px;margin:10px 0;font-size:14.5px}
 
-        .section h2 {
-            font-size: clamp(1.2rem, 4vw, 1.6rem); margin-bottom: 1.2rem;
-            display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
-        }
-        .section h2 .icon {
-            width: 38px; height: 38px; border-radius: 0.6rem;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; flex-shrink: 0;
-        }
-        .icon.blue { background: var(--primary-light); }
-        .icon.purple { background: var(--secondary-light); }
-        .icon.green { background: var(--success-light); }
-        .icon.orange { background: var(--warning-light); }
-        .icon.red { background: var(--danger-light); }
+  .tablewrap{overflow-x:auto;margin:10px 0}
+  table{border-collapse:collapse;width:100%;font-size:14px;background:#fff}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--soft);font-size:13px}
+  td code{white-space:nowrap}
 
-        h3 {
-            font-size: clamp(1rem, 3vw, 1.15rem); margin: 1.5rem 0 0.75rem;
-            color: var(--dark); padding-bottom: 0.3rem; border-bottom: 2px solid var(--border);
-        }
+  code{font-family:var(--mono);font-size:.92em;background:#eef0f4;border-radius:5px;padding:1px 5px}
+  pre.term{font-family:var(--mono);font-size:13.5px;line-height:1.6;background:#101726;color:#dde4f0;
+    border-radius:12px;padding:13px 14px;overflow-x:auto;margin:10px 0}
+  pre.term .c{color:#7d8aa5}
+  pre.term .o{color:#7ee2a8}
 
-        /* INFO CARDS */
-        .info-card {
-            background: var(--light); border-radius: 0.75rem; padding: 1.1rem;
-            margin: 0.8rem 0; border-left: 4px solid var(--primary);
-        }
-        .info-card.purple { border-left-color: var(--secondary); background: #faf5ff; }
-        .info-card.green { border-left-color: var(--success); background: #f0fdf4; }
-        .info-card.orange { border-left-color: var(--warning); background: #fffbeb; }
-        .info-card.red { border-left-color: var(--danger); background: #fef2f2; }
-        .info-card strong { display: block; margin-bottom: 0.4rem; }
+  details{border:1px solid var(--line);border-radius:11px;background:#fcfcfb;margin:10px 0}
+  summary{cursor:pointer;padding:10px 13px;font-weight:600;font-size:14.5px;list-style:none;display:flex;gap:8px;align-items:baseline}
+  summary::-webkit-details-marker{display:none}
+  summary::before{content:"▸";color:var(--acc);transition:transform .15s;flex:0 0 auto}
+  details[open] summary::before{transform:rotate(90deg)}
+  details .inner{padding:2px 14px 12px;border-top:1px dashed var(--line);font-size:14.5px}
+  details.sol summary{color:var(--acc)}
 
-        /* GRIDS */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
-        .grid-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin: 0.8rem 0; }
+  .symgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin:10px 0}
+  .sym{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;background:#fff}
+  .sym svg{width:100%;height:auto;max-width:120px}
+  .sym .cap{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .figure{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:10px 0;text-align:center}
+  .figure svg{max-width:100%;height:auto}
+  .figure .cap{font-size:13px;color:var(--muted);margin-top:6px;text-align:left}
+  svg .wire{stroke:#1c2430;stroke-width:2;fill:none}
+  svg .comp{stroke:#1c2430;stroke-width:2;fill:#fff}
+  svg .lbl{font-family:var(--mono);font-size:14px;fill:#1c2430}
+  svg .arrow{stroke:var(--et);stroke-width:2.4;fill:none}
+  svg .ah{fill:var(--et)}
 
-        /* MINI CARDS */
-        .card-mini {
-            background: white; border: 2px solid var(--border); border-radius: 0.75rem;
-            padding: 0.9rem; text-align: center; transition: all 0.2s;
-        }
-        .card-mini:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
-        .card-mini .number { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.2rem; }
-        .card-mini .label { font-size: 0.8rem; color: var(--gray); line-height: 1.4; }
+  .lsl{font-family:var(--mono);font-size:14px;display:flex;flex-wrap:wrap;gap:4px;margin:10px 0}
+  .lsl span{padding:5px 7px;border-radius:7px}
+  .s1{background:#fde2e4}.s2{background:#fff3c4}.s3{background:#d9f2dd}.s4{background:#d5e8fb}
+  .s5{background:#ecdcf7}.s6{background:#ffe2cc}.s7{background:#d9f0ef}.s8{background:#f2e4d5}
+  .s9{background:#e4e7ec}.s10{background:#fcd9ec}
+  .legend{font-size:13.5px;columns:2;column-gap:18px}
+  .legend li{break-inside:avoid}
+  @media(max-width:520px){.legend{columns:1}}
+  .dot{display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:6px;vertical-align:-1px}
 
-        /* SVG DIAGRAMS */
-        .diagram-container {
-            width: 100%; overflow-x: auto; margin: 1.2rem 0;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--border);
-        }
-        .diagram-container svg {
-            display: block; margin: 0 auto; max-width: 100%; height: auto;
-        }
+  .stacks{display:grid;grid-template-columns:1fr;gap:14px;margin:12px 0}
+  @media(min-width:620px){.stacks{grid-template-columns:1fr 1fr}}
+  .stack{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+  .stack-title{font-weight:700;font-size:14px;margin-bottom:8px;text-align:center}
+  .layer{border:1px solid #9db4e8;background:var(--dk-soft);
+    border-radius:8px;padding:7px 8px;text-align:center;font-size:13.5px;margin-top:6px}
+  .layer.dim{background:#f1f3f7;border-color:var(--line);color:var(--muted)}
+  .layer.split{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:none;border:none;padding:0}
+  .layer.split span{border:1px solid #88a6e6;background:#dbe7fd;border-radius:8px;padding:7px 6px}
+  .layer small{display:block;color:var(--muted)}
 
-        /* PROCESS FLOW */
-        .process-flow {
-            display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
-            justify-content: center; margin: 1rem 0;
-        }
-        .process-step {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white; padding: 0.5rem 0.8rem; border-radius: 0.5rem;
-            font-size: 0.75rem; font-weight: 600; text-align: center; min-width: 80px;
-        }
-        .process-arrow { color: var(--gray); font-size: 1rem; }
-
-        /* LÜCKENTEXT */
-        .lueckentext {
-            background: #fffbeb; border: 2px dashed var(--warning);
-            border-radius: 0.75rem; padding: 1.2rem; margin: 1rem 0;
-        }
-        .lueckentext .blank {
-            background: var(--warning); color: white; padding: 0.1rem 0.6rem;
-            border-radius: 0.25rem; font-weight: 700; display: inline-block; margin: 0.1rem;
-            font-size: 0.85rem;
-        }
-        .word-bank {
-            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem;
-            padding-top: 1rem; border-top: 2px dashed var(--border);
-        }
-        .word-bank span {
-            background: var(--warning-light); border: 1px solid var(--warning);
-            padding: 0.2rem 0.6rem; border-radius: 2rem; font-size: 0.8rem; font-weight: 600;
-        }
-
-        /* TABLES */
-        .table-container { width: 100%; overflow-x: auto; margin: 0.8rem 0; border-radius: 0.75rem; }
-        .table-styled {
-            width: 100%; border-collapse: collapse; font-size: 0.85rem; min-width: 400px;
-        }
-        .table-styled th {
-            background: var(--primary); color: white; padding: 0.7rem 0.8rem; text-align: left;
-            white-space: nowrap;
-        }
-        .table-styled td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); }
-        .table-styled tr:nth-child(even) { background: var(--light); }
-        .table-styled tr:hover { background: var(--primary-light); }
-
-        .table-styled.purple th { background: var(--secondary); }
-        .table-styled.green th { background: var(--success); }
-        .table-styled.orange th { background: var(--warning); }
-
-        /* HIGHLIGHT BOX */
-        .highlight-box {
-            background: linear-gradient(135deg, #667eea11, #764ba211);
-            border: 2px solid var(--primary); border-radius: 0.75rem;
-            padding: 1.2rem; margin: 0.8rem 0;
-        }
-
-        /* TAGS */
-        .tag {
-            display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.25rem;
-            font-size: 0.75rem; font-weight: 600; margin: 0.1rem;
-        }
-        .tag-blue { background: var(--primary-light); color: var(--primary); }
-        .tag-purple { background: var(--secondary-light); color: var(--secondary); }
-        .tag-green { background: var(--success-light); color: var(--success); }
-        .tag-orange { background: var(--warning-light); color: var(--warning); }
-        .tag-red { background: var(--danger-light); color: var(--danger); }
-
-        /* MEMO TIP */
-        .memo-tip {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border-radius: 0.75rem; padding: 1rem 1.1rem; margin: 0.8rem 0;
-            display: flex; align-items: flex-start; gap: 0.6rem; font-size: 0.85rem;
-        }
-        .memo-tip .tip-icon { font-size: 1.3rem; flex-shrink: 0; }
-
-        /* SUPPORT LEVELS */
-        .support-levels { display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
-        .level-bar {
-            display: flex; align-items: stretch; border-radius: 0.75rem;
-            overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        .level-label {
-            padding: 0.8rem; color: white; font-weight: 700; min-width: 100px;
-            display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
-        }
-        .level-content { padding: 0.7rem 0.9rem; background: white; flex: 1; font-size: 0.82rem; }
-        .level-bar:nth-child(1) .level-label { background: var(--success); }
-        .level-bar:nth-child(2) .level-label { background: var(--warning); }
-        .level-bar:nth-child(3) .level-label { background: var(--danger); }
-
-        /* COMPARISON */
-        .comparison-table {
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0;
-        }
-        .comparison-col { border-radius: 0.75rem; padding: 1rem; text-align: center; }
-        .comparison-col:nth-child(1) { background: #dbeafe; border: 2px solid var(--primary); }
-        .comparison-col:nth-child(2) { background: #d1fae5; border: 2px solid var(--success); }
-        .comparison-col:nth-child(3) { background: #fef3c7; border: 2px solid var(--warning); }
-        .comparison-col h4 { margin-bottom: 0.3rem; font-size: 1rem; }
-        .comparison-col p { font-size: 0.8rem; line-height: 1.4; }
-
-        /* CONTRACTS */
-        .contract-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
-        .contract-card {
-            border-radius: 0.75rem; padding: 1rem; border: 2px solid var(--border); text-align: center;
-        }
-        .contract-card h4 { margin-bottom: 0.4rem; padding-bottom: 0.4rem; border-bottom: 2px solid var(--border); }
-        .contract-card p { font-size: 0.8rem; color: var(--gray); }
-
-        /* METRICS */
-        .sla-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; margin: 0.8rem 0; }
-        .metric-card {
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #bae6fd;
-            border-radius: 0.75rem; padding: 0.8rem; text-align: center;
-        }
-        .metric-card .value { font-size: clamp(1.3rem, 4vw, 1.8rem); font-weight: 800; color: var(--primary); }
-        .metric-card .desc { font-size: 0.72rem; color: var(--gray); margin-top: 0.2rem; }
-
-        /* CHECKLIST */
-        ul { padding-left: 1.4rem; margin: 0.4rem 0; }
-        li { margin: 0.3rem 0; font-size: 0.9rem; }
-        .checklist { list-style: none; padding: 0; }
-        .checklist li { padding: 0.4rem 0 0.4rem 1.8rem; position: relative; }
-        .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--success); font-weight: 700; font-size: 1.1rem; }
-
-        /* WICHTIG BADGE */
-        .wichtig { position: relative; overflow: hidden; }
-        .wichtig::after {
-            content: "PRÜFUNGSRELEVANT"; position: absolute; top: 14px; right: -30px;
-            background: var(--danger); color: white; padding: 0.2rem 2.5rem;
-            font-size: 0.65rem; font-weight: 700; transform: rotate(45deg);
-        }
-
-        /* FOOTER */
-        .footer { text-align: center; color: rgba(255,255,255,0.8); padding: 1.5rem; font-size: 0.85rem; }
-
-        /* ============ MOBILE RESPONSIVE ============ */
-        @media (max-width: 768px) {
-            body { padding: 0.75rem; font-size: 15px; }
-            .section { padding: 1.1rem; }
-            .grid-2, .grid-3, .comparison-table, .contract-cards {
-                grid-template-columns: 1fr;
-            }
-            .nav-bar { position: static; padding: 0.8rem; gap: 0.3rem; }
-            .nav-bar a { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
-            .level-bar { flex-direction: column; }
-            .level-label { min-width: auto; padding: 0.5rem; }
-            .process-flow { gap: 0.3rem; }
-            .process-step { min-width: 65px; padding: 0.4rem 0.5rem; font-size: 0.68rem; }
-            .process-arrow { font-size: 0.8rem; }
-            .lueckentext { padding: 1rem; font-size: 0.85rem; }
-            .memo-tip { flex-direction: column; gap: 0.4rem; }
-            .diagram-container { padding: 0.6rem; }
-            h3 { font-size: 1rem; }
-            .sla-metrics { grid-template-columns: 1fr 1fr; }
-            .wichtig::after { font-size: 0.55rem; top: 10px; right: -35px; }
-        }
-
-        @media (max-width: 400px) {
-            body { padding: 0.5rem; }
-            .section { padding: 0.9rem; border-radius: 0.75rem; }
-            .header { padding: 1.5rem 0.5rem; }
-            .nav-bar a { padding: 0.35rem 0.5rem; font-size: 0.68rem; }
-            .sla-metrics { grid-template-columns: 1fr; }
-            .grid-auto { grid-template-columns: 1fr 1fr; }
-        }
-
-        /* PRINT */
-        @media print {
-            body { background: white; padding: 0; }
-            .nav-bar { display: none; }
-            .section { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
-        }
-    </style>
+  .toolbar{display:flex;justify-content:flex-end;margin:8px 0 0}
+  .toolbar button{font:600 13px/1 system-ui;border:1.5px solid var(--ink);background:#fff;color:var(--ink);
+    border-radius:999px;padding:8px 14px;cursor:pointer}
+  footer{margin-top:42px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+  @media print{
+    nav.chips,.toolbar{display:none}
+    body{background:#fff}
+    .card,details{break-inside:avoid}
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <div class="header">
-            <h1>📚 BGP Lernzettel</h1>
-            <p class="subtitle">Lernfeld 6 — Serviceanfragen bearbeiten</p>
-            <div class="exam-info">📝 Schulaufgabe — 21. Mai 2026</div>
-        </div>
+<div class="wrap">
 
-        <!-- NAVIGATION -->
-        <nav class="nav-bar">
-            <a href="#kickoff">🚀 Kick-off & SLA</a>
-            <a href="#itil">🔧 ITIL v4</a>
-            <a href="#incident">🎫 Incident Mgmt</a>
-            <a href="#problem">🔍 Problem Mgmt</a>
-            <a href="#kpi">📊 KPI</a>
-        </nav>
+<header class="hero">
+  <div class="kicker">Schulaufgabe · Montag</div>
+  <h1>Lernzettel: Elektrotechnik · MQTT · Linux · Raspberry Pi · Docker</h1>
+  <p>Alle Prüfungsthemen kompakt – mit Formeln, durchgerechneten AB-Aufgaben und Selbsttest. Lösungen zum Aufklappen.</p>
+  <div class="toolbar"><button id="toggleAll" type="button">Alle Lösungen ausklappen</button></div>
+</header>
 
-        <!-- ==================== SECTION 1: KICK-OFF & SLA ==================== -->
-        <section class="section" id="kickoff">
-            <h2><span class="icon blue">🚀</span> Kick-off: IT-Services, SLA & Verträge</h2>
+<nav class="chips">
+  <a class="c-et" href="#elektro">1 · Elektrotechnik</a>
+  <a class="c-mq" href="#mqtt">2 · MQTT</a>
+  <a class="c-lx" href="#linux">3 · Linux</a>
+  <a class="c-pi" href="#raspi">4 · Raspberry Pi</a>
+  <a class="c-dk" href="#docker">5 · Docker</a>
+  <a class="c-qz" href="#quiz">6 · Selbsttest</a>
+</nav>
 
-            <h3>IT-Services — Kerngeschäft von SysCon IT</h3>
-            <!-- SVG INFOGRAFIK: IT Services -->
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <rect x="20" y="30" width="200" height="140" rx="16" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-                    <text x="120" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#1d4ed8">🖥️ Hardware Mgmt</text>
-                    <text x="120" y="90" text-anchor="middle" font-size="10" fill="#475569">Bereitstellung</text>
-                    <text x="120" y="108" text-anchor="middle" font-size="10" fill="#475569">Wartung</text>
-                    <text x="120" y="126" text-anchor="middle" font-size="10" fill="#475569">Inventarisierung</text>
-                    <rect x="250" y="30" width="200" height="140" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-                    <text x="350" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#6d28d9">💿 Software Mgmt</text>
-                    <text x="350" y="90" text-anchor="middle" font-size="10" fill="#475569">OS Deployment</text>
-                    <text x="350" y="108" text-anchor="middle" font-size="10" fill="#475569">Softwarepaketierung</text>
-                    <text x="350" y="126" text-anchor="middle" font-size="10" fill="#475569">Patchmanagement</text>
-                    <text x="350" y="144" text-anchor="middle" font-size="10" fill="#475569">Softwareverteilung</text>
-                    <rect x="480" y="30" width="200" height="140" rx="16" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="580" y="65" text-anchor="middle" font-size="13" font-weight="bold" fill="#047857">📞 IT-Service Mgmt</text>
-                    <text x="580" y="90" text-anchor="middle" font-size="10" fill="#475569">Service Desk (SPOC)</text>
-                    <text x="580" y="108" text-anchor="middle" font-size="10" fill="#475569">Monitoring</text>
-                    <text x="580" y="126" text-anchor="middle" font-size="10" fill="#475569">SLA-Einhaltung</text>
-                    <text x="580" y="144" text-anchor="middle" font-size="10" fill="#475569">Reporting & Statistik</text>
-                </svg>
-            </div>
+<!-- ================= 1 ELEKTROTECHNIK ================= -->
+<section id="elektro">
+  <div class="sec-head"><span class="num">01</span><h2>Elektrotechnik</h2></div>
+  <p class="sec-sub">Ohmsches Gesetz · Reihen-/Parallelschaltung · Knotenregel · Bauelemente · Bezugspfeile · Messen · LED-Vorwiderstand</p>
 
-            <h3>SPOC — Single Point of Contact</h3>
-            <div class="info-card">
-                <strong>Service Desk = Einzige Anlaufstelle für den Kunden</strong>
-                <p>Kontaktkanäle: Telefon & E-Mail. Der Service Desk ist die zentrale Schnittstelle zwischen Nutzer und IT-Organisation. Er übernimmt Registrierung, Einordnung, einfache Problemlösungen und Weiterleitung (Dispatching).</p>
-            </div>
+  <div class="card">
+    <h3>Kenngrößen &amp; Einheiten</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Größe</th><th>Formelzeichen</th><th>Einheit</th><th>Messgerät / Anschluss</th></tr>
+      <tr><td>Spannung</td><td>U</td><td>Volt (V)</td><td>Voltmeter – <b>parallel</b></td></tr>
+      <tr><td>Stromstärke</td><td>I</td><td>Ampere (A)</td><td>Amperemeter – <b>in Reihe</b></td></tr>
+      <tr><td>Widerstand</td><td>R</td><td>Ohm (Ω)</td><td>Ohmmeter / Multimeter</td></tr>
+      <tr><td>Leistung</td><td>P</td><td>Watt (W)</td><td>P = U · I</td></tr>
+    </table></div>
+    <div class="merk"><b>Umrechnen:</b> 1 A = 1000 mA &nbsp;·&nbsp; 1 kΩ = 1000 Ω &nbsp;·&nbsp; 1 MΩ = 1.000.000 Ω.
+    Beispiel: 200 mA = 0,2 A. In Formeln immer mit <b>Grundeinheiten</b> (V, A, Ω) rechnen!</div>
+  </div>
 
-            <h3>Support-Level-System (Pyramide)</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 600 280" xmlns="http://www.w3.org/2000/svg" style="max-width:500px;">
-                    <polygon points="300,20 380,90 220,90" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
-                    <text x="300" y="65" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">3rd Level</text>
-                    <text x="300" y="80" text-anchor="middle" font-size="8" fill="#7f1d1d">Experten/Hersteller</text>
-                    <polygon points="220,95 380,95 430,170 170,170" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="300" y="125" text-anchor="middle" font-size="11" font-weight="bold" fill="#d97706">2nd Level</text>
-                    <text x="300" y="143" text-anchor="middle" font-size="9" fill="#92400e">IT-Spezialisten</text>
-                    <text x="300" y="158" text-anchor="middle" font-size="8" fill="#78350f">Komplexe Probleme, Wartung</text>
-                    <polygon points="170,175 430,175 500,260 100,260" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="300" y="205" text-anchor="middle" font-size="12" font-weight="bold" fill="#059669">1st Level — Service Desk</text>
-                    <text x="300" y="225" text-anchor="middle" font-size="9" fill="#064e3b">Erste Anlaufstelle, Kundenkontakt</text>
-                    <text x="300" y="242" text-anchor="middle" font-size="9" fill="#064e3b">Einfache Lösungen, Erfassung, Dispatching</text>
-                    <path d="M 435 130 L 490 130" stroke="#d97706" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
-                    <text x="495" y="128" font-size="8" fill="#92400e">Eskalation ↑</text>
-                    <text x="495" y="140" font-size="7" fill="#92400e">(funktional)</text>
-                    <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#d97706"/></marker></defs>
-                </svg>
-            </div>
+  <div class="card">
+    <h3>Ohmsches Gesetz</h3>
+    <div class="formula">U = R · I &nbsp;&nbsp;⇔&nbsp;&nbsp; R = U / I &nbsp;&nbsp;⇔&nbsp;&nbsp; I = U / R</div>
+    <p><b>URI-Dreieck:</b> U oben, R und I unten. Gesuchte Größe abdecken → der Rest ist die Formel
+    (U abdecken → R · I; I abdecken → U / R).</p>
+  </div>
 
-            <div class="support-levels">
-                <div class="level-bar">
-                    <div class="level-label">1st Level</div>
-                    <div class="level-content">
-                        <strong>Erste Anlaufstelle:</strong> Kundenkontakt, einfache Problemlösungen, vollständige Erfassung aller Infos, Eskalation an Level 2 (Dispatching)
-                    </div>
-                </div>
-                <div class="level-bar">
-                    <div class="level-label">2nd Level</div>
-                    <div class="level-content">
-                        <strong>IT-Spezialisten:</strong> Komplexere Probleme, Wartung, unterstützt Level 1, i.d.R. nicht telefonisch, dokumentiert Lösungen in Wissensdatenbank
-                    </div>
-                </div>
-                <div class="level-bar">
-                    <div class="level-label">3rd Level</div>
-                    <div class="level-content">
-                        <strong>Experten / Hersteller:</strong> Höchste Eskalationsstufe, schwierigste Probleme, kein direkter Kundenkontakt, pflegt Wissensdatenbank
-                    </div>
-                </div>
-            </div>
-
-            <h3>SLA / OLA / UC — Die 3 Vertragsebenen</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <rect x="20" y="60" width="140" height="80" rx="12" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="90" y="90" text-anchor="middle" font-size="11" font-weight="bold" fill="#92400e">🏢 Externe</text>
-                    <text x="90" y="108" text-anchor="middle" font-size="11" font-weight="bold" fill="#92400e">Kunden</text>
-                    <text x="90" y="128" text-anchor="middle" font-size="9" fill="#78350f">(z.B. Autoteile AG)</text>
-                    <line x1="160" y1="100" x2="250" y2="100" stroke="#2563eb" stroke-width="3"/>
-                    <polygon points="250,95 260,100 250,105" fill="#2563eb"/>
-                    <polygon points="160,95 150,100 160,105" fill="#2563eb"/>
-                    <rect x="175" y="78" width="55" height="20" rx="4" fill="#2563eb"/>
-                    <text x="202" y="92" text-anchor="middle" font-size="9" font-weight="bold" fill="white">SLA</text>
-                    <rect x="260" y="45" width="180" height="110" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/>
-                    <text x="350" y="75" text-anchor="middle" font-size="13" font-weight="bold" fill="#1d4ed8">🏗️ SysCon IT</text>
-                    <text x="350" y="98" text-anchor="middle" font-size="9" fill="#1e40af">Abt. A ↔ Abt. B</text>
-                    <rect x="305" y="110" width="90" height="18" rx="4" fill="#059669"/>
-                    <text x="350" y="123" text-anchor="middle" font-size="8" font-weight="bold" fill="white">OLA (intern)</text>
-                    <line x1="440" y1="100" x2="530" y2="100" stroke="#d97706" stroke-width="3"/>
-                    <polygon points="530,95 540,100 530,105" fill="#d97706"/>
-                    <polygon points="440,95 430,100 440,105" fill="#d97706"/>
-                    <rect x="455" y="78" width="55" height="20" rx="4" fill="#d97706"/>
-                    <text x="482" y="92" text-anchor="middle" font-size="9" font-weight="bold" fill="white">UC</text>
-                    <rect x="540" y="60" width="140" height="80" rx="12" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
-                    <text x="610" y="90" text-anchor="middle" font-size="11" font-weight="bold" fill="#991b1b">🔧 3rd Level</text>
-                    <text x="610" y="108" text-anchor="middle" font-size="11" font-weight="bold" fill="#991b1b">Anbieter</text>
-                    <text x="610" y="128" text-anchor="middle" font-size="9" fill="#7f1d1d">(Hersteller/Experten)</text>
-                </svg>
-            </div>
-
-            <div class="comparison-table">
-                <div class="comparison-col">
-                    <h4>📄 SLA</h4>
-                    <p><strong>Service Level Agreement</strong></p>
-                    <p>SysCon IT ↔ Externe Kunden</p>
-                    <p><em>Bidirektional</em></p>
-                </div>
-                <div class="comparison-col">
-                    <h4>📋 OLA</h4>
-                    <p><strong>Operation Level Agreement</strong></p>
-                    <p>SysCon IT intern (Abt.↔Abt.)</p>
-                    <p><em>Intern</em></p>
-                </div>
-                <div class="comparison-col">
-                    <h4>📑 UC</h4>
-                    <p><strong>Underpinning Contract</strong></p>
-                    <p>3rd Level Anbieter ↔ SysCon IT</p>
-                    <p><em>Extern (Zulieferer)</em></p>
-                </div>
-            </div>
-
-            <h3>Was ist ein SLA?</h3>
-            <div class="highlight-box">
-                <p style="font-size:1.1rem;"><strong>S</strong> = Service (Dienstleistung) &nbsp;|&nbsp; <strong>L</strong> = Level (Qualitätsstufe/Güte) &nbsp;|&nbsp; <strong>A</strong> = Agreement (Vereinbarung)</p>
-                <p style="margin-top:0.5rem;"><strong>Zweck:</strong> Kontrolle und Beurteilung von Dienstleistungen für beide Vertragsparteien <strong>transparent</strong> gestalten.</p>
-            </div>
-
-            <h3>Nutzen von SLAs</h3>
-            <ul class="checklist">
-                <li>Rechtssicherheit für beide Parteien</li>
-                <li>Genau definierte Anforderungen und Verantwortlichkeiten</li>
-                <li>Grundlage zur Leistungsverrechnung</li>
-                <li>Senkung der Koordinationskosten</li>
-                <li>Erleichterte Aufwandsschätzung</li>
-                <li>Kostenreduzierung für Leistungsüberwachung</li>
-                <li>Entscheidungsgrundlage für Make-or-Buy</li>
-                <li>Resultierend einfachere Kalkulation</li>
-            </ul>
-
-            <h3>Wichtige Inhalte eines SLA</h3>
-            <div class="grid-2">
-                <div class="info-card">
-                    <ul>
-                        <li>Beide Vertragspartner</li>
-                        <li>Vertragslaufzeit & Zweck</li>
-                        <li>Exakte Leistungsbeschreibung</li>
-                        <li>Service Level (Qualität)</li>
-                        <li>Vereinbarte Kennzahlen</li>
-                    </ul>
-                </div>
-                <div class="info-card">
-                    <ul>
-                        <li>Störungsbehebungszeiten</li>
-                        <li>Ansprechpartner beider Seiten</li>
-                        <li>Regelungen bei Leistungsstörungen</li>
-                        <li>Vertragsstrafen</li>
-                        <li>Berichtswesen & Vergütung</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>SLA-Beispiel: Autoteile AG — Kennzahlen</h3>
-            <div class="sla-metrics">
-                <div class="metric-card">
-                    <div class="value">99,25%</div>
-                    <div class="desc">Verfügbarkeit / Jahr</div>
-                </div>
-                <div class="metric-card">
-                    <div class="value">95%</div>
-                    <div class="desc">Anrufe beantwortet</div>
-                </div>
-                <div class="metric-card">
-                    <div class="value">75%</div>
-                    <div class="desc">In ≤ 20 Sek.</div>
-                </div>
-                <div class="metric-card">
-                    <div class="value">90%</div>
-                    <div class="desc">In ≤ 40 Sek.</div>
-                </div>
-                <div class="metric-card">
-                    <div class="value">&lt;5%</div>
-                    <div class="desc">Verlorene Anrufe</div>
-                </div>
-                <div class="metric-card">
-                    <div class="value">≤10%</div>
-                    <div class="desc">Per Voicemail</div>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table class="table-styled">
-                    <thead><tr><th>Priorität</th><th>Reaktionszeit</th><th>Erstlösung in</th><th>Quote</th><th>Max. Dauer</th></tr></thead>
-                    <tbody>
-                        <tr><td><span class="tag tag-red">Prio 1 (Kritisch)</span></td><td>1 Arbeitsstunde</td><td>60 Min.</td><td>90%</td><td>max. 2 Tage</td></tr>
-                        <tr><td><span class="tag tag-orange">Prio 2 (Standard)</span></td><td>5 Arbeitsstunden</td><td>3 Stunden</td><td>75%</td><td>max. 3 Tage</td></tr>
-                        <tr><td><span class="tag tag-green">Prio 3 (Niedrig)</span></td><td>1 Arbeitstag</td><td>6 Stunden</td><td>70%</td><td>max. 5 Tage</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h3>Servicezeiten & Leistungsumfang</h3>
-            <div class="grid-3">
-                <div class="card-mini"><div class="number" style="color:var(--primary);">Mo–Fr</div><div class="label">07:00 – 20:00</div></div>
-                <div class="card-mini"><div class="number" style="color:var(--warning);">Sa</div><div class="label">09:00 – 18:00</div></div>
-                <div class="card-mini"><div class="number" style="color:var(--danger);">So/Feiertag</div><div class="label">Kein Betrieb</div></div>
-            </div>
-
-            <div class="grid-auto">
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--primary);">400</div><div class="label">Desktop PCs</div></div>
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--secondary);">100</div><div class="label">Tablets</div></div>
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--success);">8</div><div class="label">Server (Daten/Mail/Drucker)</div></div>
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--warning);">54</div><div class="label">Drucker</div></div>
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--danger);">48</div><div class="label">Router + Switche</div></div>
-                <div class="card-mini"><div class="number" style="font-size:1.3rem;color:var(--gray);">1</div><div class="label">Telefonanlage</div></div>
-            </div>
-
-            <h3>SLC — Service Level Commitment</h3>
-            <div class="info-card purple">
-                <strong>SLA vs. SLC — Unterschied:</strong>
-                <ul>
-                    <li><strong>SLA</strong> = bidirektional (zwei Partner vereinbaren gemeinsam)</li>
-                    <li><strong>SLC</strong> = einseitig gerichtete Verpflichtung (ein Team garantiert)</li>
-                    <li>SLC = umfassendere, allgemeinere Form eines SLAs</li>
-                    <li>Fokus auf bestimmte Themen/Prozesse — nicht kundenspezifisch</li>
-                    <li>Kunde hat nur begrenzten Einfluss darauf</li>
-                </ul>
-            </div>
-
-            <h3>Vertragsarten im IT-Bereich</h3>
-            <div class="contract-cards">
-                <div class="contract-card">
-                    <h4>📜 Mietvertrag</h4>
-                    <p>Hard-/Softwareüberlassung <strong>auf Zeit</strong></p>
-                    <p style="margin-top:0.3rem;font-size:0.75rem;color:var(--success);">Nutzung gegen Gebühr</p>
-                </div>
-                <div class="contract-card">
-                    <h4>🔨 Werkvertrag</h4>
-                    <p>Rollouts, Wartung, Patchmanagement</p>
-                    <p style="margin-top:0.3rem;font-size:0.75rem;color:var(--success);"><strong>Ergebnis geschuldet!</strong></p>
-                </div>
-                <div class="contract-card">
-                    <h4>🤝 Dienstvertrag</h4>
-                    <p>Service Desk (Bemühen geschuldet)</p>
-                    <p style="margin-top:0.3rem;font-size:0.75rem;color:var(--success);">Qualität über <strong>SLA</strong> geregelt</p>
-                </div>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">💡</span>
-                <div><strong>Wichtig:</strong> Bei Dienstverträgen ist <em>nicht geregelt</em>, in welcher Dienstgüte die Leistungen zu erbringen sind → daher braucht man SLAs als <strong>ergänzenden Vertrag</strong>, der die Dienstgüte genau beschreibt!</div>
-            </div>
-
-            <h3>IaaS / PaaS / SaaS</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <rect x="20" y="20" width="200" height="145" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-                    <text x="120" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#1d4ed8">IaaS</text>
-                    <text x="120" y="68" text-anchor="middle" font-size="9" fill="#475569">Infrastructure as a Service</text>
-                    <line x1="40" y1="78" x2="200" y2="78" stroke="#93c5fd" stroke-width="1"/>
-                    <text x="120" y="96" text-anchor="middle" font-size="9" fill="#1e40af">Server, Speicher, Netzwerk</text>
-                    <text x="120" y="114" text-anchor="middle" font-size="8" fill="#64748b">AWS, Rackspace Cloud</text>
-                    <text x="120" y="134" text-anchor="middle" font-size="8" fill="#059669">✓ Keine eigene HW nötig</text>
-                    <text x="120" y="152" text-anchor="middle" font-size="8" fill="#dc2626">✗ Sicherheit nicht in eigener Hand</text>
-                    <rect x="250" y="20" width="200" height="145" rx="14" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="350" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#047857">PaaS</text>
-                    <text x="350" y="68" text-anchor="middle" font-size="9" fill="#475569">Platform as a Service</text>
-                    <line x1="270" y1="78" x2="430" y2="78" stroke="#6ee7b7" stroke-width="1"/>
-                    <text x="350" y="96" text-anchor="middle" font-size="9" fill="#065f46">Entwicklungsumgebung</text>
-                    <text x="350" y="114" text-anchor="middle" font-size="8" fill="#64748b">Google App Engine, Azure</text>
-                    <text x="350" y="134" text-anchor="middle" font-size="8" fill="#059669">✓ Nur Programmierung nötig</text>
-                    <text x="350" y="152" text-anchor="middle" font-size="8" fill="#dc2626">✗ HW-Ausfall = SW-Ausfall</text>
-                    <rect x="480" y="20" width="200" height="145" rx="14" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="580" y="48" text-anchor="middle" font-size="14" font-weight="bold" fill="#b45309">SaaS</text>
-                    <text x="580" y="68" text-anchor="middle" font-size="9" fill="#475569">Software as a Service</text>
-                    <line x1="500" y1="78" x2="660" y2="78" stroke="#fcd34d" stroke-width="1"/>
-                    <text x="580" y="96" text-anchor="middle" font-size="9" fill="#92400e">Software per Abo (Internet)</text>
-                    <text x="580" y="114" text-anchor="middle" font-size="8" fill="#64748b">Office 365, Dropbox, Google Docs</text>
-                    <text x="580" y="134" text-anchor="middle" font-size="8" fill="#059669">✓ Skalierbare Kosten</text>
-                    <text x="580" y="152" text-anchor="middle" font-size="8" fill="#dc2626">✗ Abhängigkeit vom Anbieter</text>
-                </svg>
-            </div>
-
-            <h3>Eskalation — Definition</h3>
-            <div class="info-card orange">
-                <strong>Was ist Eskalation?</strong>
-                <ul>
-                    <li><strong>Allgemein:</strong> Intensivierung einer Konflikt- oder Krisensituation</li>
-                    <li><strong>IT:</strong> Informieren einer höheren Hierarchiestufe / Weiterleitung an Spezialisten</li>
-                    <li><strong>Funktionale Eskalation:</strong> Level 1 → 2 → 3 (fachlich)</li>
-                    <li><strong>Hierarchische Eskalation:</strong> Einbeziehung von Management</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- ==================== SECTION 2: ITIL v4 ==================== -->
-        <section class="section purple" id="itil">
-            <h2><span class="icon purple">🔧</span> ITIL v4 — Service Value System & Praktiken</h2>
-
-            <h3>Was ist das Service Value System (SVS)?</h3>
-            <div class="info-card purple">
-                <strong>Definition:</strong>
-                <p>Das SVS ist die <strong>„Vogelperspektive"</strong> der Service-Management-Landschaft. Es beschreibt:</p>
-                <ul>
-                    <li>Die <strong>Eingaben</strong> in das System (Anforderungen, Chancen)</li>
-                    <li>Die verschiedenen <strong>Elemente</strong> der Organisation (direkt in Wertschaffung eingebunden)</li>
-                    <li>Die <strong>Ergebnisse</strong> (Erreichen der Geschäftsziele → Wert/Value)</li>
-                </ul>
-                <p style="margin-top:0.5rem;"><strong>Zweck:</strong> Definiert Aktivitäten, Workflows, Steuerungen und Verfahren zum <strong>Erreichen der vereinbarten Ziele</strong>. Zeigt wie alle Komponenten zusammenwirken um <strong>Wertschöpfung zu ermöglichen</strong>.</p>
-            </div>
-
-            <h3>5 Komponenten des SVS</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 320" xmlns="http://www.w3.org/2000/svg" style="max-width:580px;">
-                    <!-- Central circle -->
-                    <circle cx="350" cy="160" r="50" fill="#ede9fe" stroke="#7c3aed" stroke-width="3"/>
-                    <text x="350" y="155" text-anchor="middle" font-size="11" font-weight="bold" fill="#5b21b6">Service</text>
-                    <text x="350" y="172" text-anchor="middle" font-size="11" font-weight="bold" fill="#5b21b6">Value System</text>
-                    <!-- 1. Leitprinzipien (top) -->
-                    <rect x="280" y="10" width="140" height="42" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-                    <text x="350" y="30" text-anchor="middle" font-size="9" font-weight="bold" fill="#1d4ed8">🧭 Leitprinzipien</text>
-                    <text x="350" y="44" text-anchor="middle" font-size="8" fill="#475569">Guiding Principles</text>
-                    <line x1="350" y1="52" x2="350" y2="110" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4"/>
-                    <!-- 2. Steuerung (top-right) -->
-                    <rect x="510" y="70" width="130" height="42" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="575" y="88" text-anchor="middle" font-size="9" font-weight="bold" fill="#047857">⚙️ Steuerung</text>
-                    <text x="575" y="103" text-anchor="middle" font-size="8" fill="#475569">Governance</text>
-                    <line x1="510" y1="91" x2="400" y2="140" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4"/>
-                    <!-- 3. Wertschöpfungskette (right) -->
-                    <rect x="500" y="185" width="155" height="42" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="577" y="203" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#92400e">🔗 Wertschöpfungskette</text>
-                    <text x="577" y="218" text-anchor="middle" font-size="8" fill="#475569">Service Value Chain</text>
-                    <line x1="500" y1="206" x2="400" y2="178" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4"/>
-                    <!-- 4. Kontinuierliche Verbesserung (bottom-left) -->
-                    <rect x="50" y="185" width="175" height="42" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
-                    <text x="137" y="203" text-anchor="middle" font-size="8.5" font-weight="bold" fill="#991b1b">📈 Kont. Verbesserung</text>
-                    <text x="137" y="218" text-anchor="middle" font-size="8" fill="#475569">Continual Improvement</text>
-                    <line x1="225" y1="206" x2="300" y2="178" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4"/>
-                    <!-- 5. Praktiken (left) -->
-                    <rect x="60" y="70" width="130" height="42" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-                    <text x="125" y="88" text-anchor="middle" font-size="9" font-weight="bold" fill="#5b21b6">🛠️ Praktiken</text>
-                    <text x="125" y="103" text-anchor="middle" font-size="8" fill="#475569">Practices (34)</text>
-                    <line x1="190" y1="91" x2="300" y2="140" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4"/>
-                    <!-- Input/Output -->
-                    <rect x="110" y="265" width="110" height="30" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
-                    <text x="165" y="284" text-anchor="middle" font-size="8" fill="#475569">📥 Eingaben (Input)</text>
-                    <rect x="480" y="265" width="110" height="30" rx="8" fill="#f1f5f9" stroke="#94a3b8" stroke-width="1.5"/>
-                    <text x="535" y="284" text-anchor="middle" font-size="8" fill="#475569">📤 Wert (Value)</text>
-                </svg>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">💡</span>
-                <div><strong>Merkhilfe (5 Komponenten):</strong> <em>„<strong>L</strong>isa <strong>S</strong>ucht <strong>W</strong>ertvolle <strong>K</strong>unden <strong>P</strong>er..."</em><br>→ <strong>L</strong>eitprinzipien, <strong>S</strong>teuerung, <strong>W</strong>ertschöpfungskette, <strong>K</strong>ontinuierliche Verbesserung, <strong>P</strong>raktiken</div>
-            </div>
-
-            <h3>ITIL v4 Management-Praktiken (34 Praktiken, 3 Kategorien)</h3>
-            <div class="info-card purple">
-                <strong>Was sind Praktiken (Practices)?</strong>
-                <p>Zusammengehörige <strong>organisatorische Ressourcen</strong>, ausgerichtet auf die Erledigung bestimmter Aufgaben oder das Erreichen bestimmter Ziele.</p>
-            </div>
-
-            <div class="table-container">
-                <table class="table-styled purple">
-                    <thead><tr><th>Kategorie</th><th>Beschreibung</th><th>Beispiele (je 3)</th></tr></thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Allgemeine Mgmt-Praktiken</strong><br><small>General management</small></td>
-                            <td>Übergreifend für gesamte Organisation</td>
-                            <td>Strategy Mgmt, Portfolio Mgmt, Architecture Mgmt / Business Analysis</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Service-Mgmt-Praktiken</strong><br><small>Service management</small></td>
-                            <td>IT-Service-Bereitstellung</td>
-                            <td>Service Catalogue Mgmt, Service Design, Deployment Mgmt</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Technische Mgmt-Praktiken</strong><br><small>Technical management</small></td>
-                            <td>Technische Umsetzung & Betrieb</td>
-                            <td>Infrastructure & Platform Mgmt, Software Development & Mgmt</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">⚠️</span>
-                <div><strong>Prüfungstipp:</strong> 3 Kategorien nennen + je 3 Beispiele! Diese Tabelle auswendig lernen.</div>
-            </div>
-        </section>
-
-        <!-- ==================== SECTION 3: INCIDENT MANAGEMENT ==================== -->
-        <section class="section green wichtig" id="incident">
-            <h2><span class="icon green">🎫</span> Incident Management & Ticketsystem</h2>
-
-            <h3>Was ist ein Incident?</h3>
-            <div class="info-card green">
-                <strong>Definition:</strong>
-                <p>Eine <strong>ungeplante Unterbrechung</strong> oder <strong>Qualitätsverschlechterung</strong> eines IT-Dienstes. Auch ein Ereignis, das in der Zukunft einen IT-Service beeinträchtigen <strong>könnte</strong>.</p>
-            </div>
-
-            <div class="grid-2">
-                <div class="card-mini" style="border-color:var(--danger);">
-                    <div class="number" style="color:var(--danger);">⚠️</div>
-                    <div class="label"><strong>Beispiele:</strong><br>• Serverausfälle<br>• Netzwerkausfälle<br>• Anwendungsabstürze<br>• Datenbankprobleme<br>• Sicherheitsvorfälle (Malware)</div>
-                </div>
-                <div class="card-mini" style="border-color:var(--success);">
-                    <div class="number" style="color:var(--success);">🎯</div>
-                    <div class="label"><strong>Ziel:</strong><br>• Auswirkungen minimieren<br>• Schnellstmögliche Wiederherstellung<br>• CIA schützen (Confidentiality, Integrity, Availability)<br>• Teil des ITIL-Frameworks</div>
-                </div>
-            </div>
-
-            <h3>Der Incident-Management-Prozess (8 Schritte)</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" style="max-width:650px;">
-                    <!-- Row 1 -->
-                    <rect x="10" y="15" width="155" height="55" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-                    <text x="87" y="37" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#1d4ed8">1️⃣ Identifizierung</text>
-                    <text x="87" y="52" text-anchor="middle" font-size="7.5" fill="#475569">Erkennung: User/Monitoring</text>
-                    <path d="M 165 42 L 180 42" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="185" y="15" width="155" height="55" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="262" y="37" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#047857">2️⃣ Protokollierung</text>
-                    <text x="262" y="52" text-anchor="middle" font-size="7.5" fill="#475569">Details im System erfassen</text>
-                    <path d="M 340 42 L 355 42" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="360" y="15" width="155" height="55" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-                    <text x="437" y="37" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#5b21b6">3️⃣ Kategorisierung</text>
-                    <text x="437" y="52" text-anchor="middle" font-size="7.5" fill="#475569">Art & Priorität festlegen</text>
-                    <path d="M 515 42 L 530 42" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="535" y="15" width="155" height="55" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="612" y="37" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#92400e">4️⃣ Erstdiagnose</text>
-                    <text x="612" y="52" text-anchor="middle" font-size="7.5" fill="#475569">Erste Analyse, Lösungsideen</text>
-                    <!-- Arrow down -->
-                    <path d="M 612 70 L 612 90" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <!-- Row 2 (reversed) -->
-                    <rect x="535" y="95" width="155" height="55" rx="10" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
-                    <text x="612" y="117" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#991b1b">5️⃣ Eskalation</text>
-                    <text x="612" y="132" text-anchor="middle" font-size="7.5" fill="#475569">An höheres Level weiterleiten</text>
-                    <path d="M 535 122 L 520 122" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="360" y="95" width="155" height="55" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="437" y="117" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#047857">6️⃣ Lösung</text>
-                    <text x="437" y="132" text-anchor="middle" font-size="7.5" fill="#475569">Fix implementieren & prüfen</text>
-                    <path d="M 360 122 L 345 122" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="185" y="95" width="155" height="55" rx="10" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
-                    <text x="262" y="117" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#1d4ed8">7️⃣ Abschluss</text>
-                    <text x="262" y="132" text-anchor="middle" font-size="7.5" fill="#475569">Bestätigung & Dokumentation</text>
-                    <path d="M 185 122 L 170 122" stroke="#64748b" stroke-width="1.5" marker-end="url(#arr3)"/>
-                    <rect x="10" y="95" width="155" height="55" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-                    <text x="87" y="117" text-anchor="middle" font-size="9.5" font-weight="bold" fill="#5b21b6">8️⃣ Überprüfung</text>
-                    <text x="87" y="132" text-anchor="middle" font-size="7.5" fill="#475569">Muster & Trends analysieren</text>
-                    <defs><marker id="arr3" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/></marker></defs>
-                </svg>
-            </div>
-
-            <h3>Ticket-Felder: Automatisch vs. Manuell</h3>
-            <div class="grid-2">
-                <div class="info-card green">
-                    <strong>🤖 Automatisch erzeugt:</strong>
-                    <ul>
-                        <li>Eindeutige Ticket-ID (ID-KN)</li>
-                        <li>Datum & Uhrzeit der Erstellung</li>
-                        <li>Zugewiesener SD-Mitarbeiter</li>
-                    </ul>
-                </div>
-                <div class="info-card orange">
-                    <strong>✍️ Vom Störungsmelder:</strong>
-                    <ul>
-                        <li>Bildbeschreibung / Screenshot</li>
-                        <li>Kategorisierung (Dropdown: HW/SW)</li>
-                        <li>Dringlichkeit</li>
-                        <li>Gerätenummer</li>
-                        <li>Raum / Standort</li>
-                    </ul>
-                </div>
-            </div>
-
-            <h3>Felder mit geringer Relevanz in einer Anfrage</h3>
-            <div class="info-card red">
-                <strong>❌ Weniger relevante Felder:</strong>
-                <ul>
-                    <li><strong>Fax</strong> — veraltetes Medium, kaum noch genutzt</li>
-                    <li><strong>Ersterfassung ja/nein</strong> — redundant (System weiß es automatisch)</li>
-                    <li><strong>Telefonnummer des Service Desks</strong> — intern bereits bekannt</li>
-                </ul>
-                <p style="margin-top:0.5rem;font-size:0.85rem;"><strong>Warum?</strong> Diese Felder tragen nicht zur Identifikation, Lokalisierung, Kategorisierung oder Priorisierung bei!</p>
-            </div>
-
-            <h3>Vollständiger Incident Record</h3>
-            <div class="table-container">
-                <table class="table-styled green">
-                    <thead><tr><th>Feld</th><th>Details</th><th>Relevanz</th></tr></thead>
-                    <tbody>
-                        <tr><td><strong>ID-KN</strong></td><td>Eindeutige Referenznummer</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Datum/Uhrzeit</strong></td><td>Zeitpunkt der Meldung</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Kontaktdaten</strong></td><td>Name, Abteilung</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Ort/Stockwerk/Büro</strong></td><td>Standort</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Klassifizierung</strong></td><td>SW (Office/OS/CRM/ERP) oder HW (Drucker/PC…)</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Priorisierung</strong></td><td>kritisch-hoch / mittel-niedrig / sehr niedrig</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Kurzbeschreibung</strong></td><td>Stichpunkte zum Problem</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td><strong>Anzahl Betroffene</strong></td><td>User? Standorte? Bereiche?</td><td><span class="tag tag-green">Hoch</span></td></tr>
-                        <tr><td>Eskaliert an</td><td>Second/Third Level?</td><td><span class="tag tag-blue">Mittel</span></td></tr>
-                        <tr><td>Bearbeitungszeit</td><td>schnellstmöglich / 1-5h / 24-48h</td><td><span class="tag tag-blue">Mittel</span></td></tr>
-                        <tr><td>Status</td><td>offen / bearbeitet</td><td><span class="tag tag-blue">Mittel</span></td></tr>
-                        <tr style="opacity:0.55;"><td>Fax</td><td>Veraltet</td><td><span class="tag tag-orange">Gering</span></td></tr>
-                        <tr style="opacity:0.55;"><td>Ersterfassung ja/nein</td><td>Redundant</td><td><span class="tag tag-orange">Gering</span></td></tr>
-                        <tr style="opacity:0.55;"><td>Tel. SD-Mitarbeiter</td><td>Intern bekannt</td><td><span class="tag tag-orange">Gering</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h3>KI-Rolle im Incident Management</h3>
-            <div class="grid-3">
-                <div class="card-mini" style="border-color:var(--primary);">
-                    <div class="number" style="color:var(--primary);">⚡</div>
-                    <div class="label"><strong>Schnellere Behebung</strong><br>Minimierung Ausfallzeiten & Kosten</div>
-                </div>
-                <div class="card-mini" style="border-color:var(--success);">
-                    <div class="number" style="color:var(--success);">💰</div>
-                    <div class="label"><strong>Kostenreduzierung</strong><br>Automatisierung → weniger Betriebskosten</div>
-                </div>
-                <div class="card-mini" style="border-color:var(--secondary);">
-                    <div class="number" style="color:var(--secondary);">✅</div>
-                    <div class="label"><strong>Bessere Qualität</strong><br>Weniger Fehler, 24/7 verfügbar</div>
-                </div>
-            </div>
-
-            <!-- LÜCKENTEXT -->
-            <h3>⭐⭐ Vorteile eines Ticketsystems — DER LÜCKENTEXT ⭐⭐</h3>
-            <div class="lueckentext">
-                <p><strong>Welche wesentlichen Vorteile bietet ein Service Desk-Tool (Ticketsystem)?</strong></p>
-                <br>
-                <p>➢ Bietet die Möglichkeit <span class="blank">einheitlicher</span> / <span class="blank">detaillierter</span> Dokumentation</p>
-                <br>
-                <p>➢ Störungen können schneller und <span class="blank">effizienter beseitigt</span> werden</p>
-                <br>
-                <p>➢ Support wird <span class="blank">entlastet</span> / <span class="blank">beschleunigt</span> durch:</p>
-                <ul style="margin-left:1.5rem;">
-                    <li>automatische Antwortvorschläge einer <span class="blank">Knowledge-Base</span>, die dem Anwender mit Hilfe einer <span class="blank">Suchfunktion</span> direkt zur Verfügung gestellt wird</li>
-                    <li>Ticket-Verfolgungen</li>
-                    <li><span class="blank">Ticket-Sortierungen</span></li>
-                </ul>
-                <br>
-                <p>➢ Routineaufgaben werden <span class="blank">automatisiert</span>, Schwachstellen identifiziert und zusätzlich die <span class="blank">Produktivität</span> erhöht</p>
-                <br>
-                <p>➢ Bietet höhere User- und Kundenzufriedenheit:</p>
-                <ul style="margin-left:1.5rem;">
-                    <li>durch Monitoring, <span class="blank">Kontaktaufnahme</span> mit einem <span class="blank">zentralisierten</span> Tool für die <span class="blank">Eskalation</span> → Nutzeranfragen können schneller, <span class="blank">einheitlicher</span> und komfortabler bearbeitet werden</li>
-                </ul>
-                <br>
-                <p>➢ Regelbasierte <span class="blank">Automatisierungen</span> statt individuelle Entscheidungen</p>
-                <br>
-                <p>➢ Klare Kategorisierung und <span class="blank">Priorisierungen</span></p>
-
-                <div class="word-bank">
-                    <strong style="width:100%;display:block;margin-bottom:0.3rem;">📝 Wortbank (14 Wörter zum Einsetzen):</strong>
-                    <span>einheitlicher</span>
-                    <span>Priorisierungen</span>
-                    <span>Automatisierungen</span>
-                    <span>effizienter beseitigt</span>
-                    <span>beschleunigt</span>
-                    <span>detaillierter</span>
-                    <span>Produktivität</span>
-                    <span>Kontaktaufnahme</span>
-                    <span>zentralisierter</span>
-                    <span>entlastet</span>
-                    <span>Eskalation</span>
-                    <span>Knowledge-Base</span>
-                    <span>Ticket-Sortierungen</span>
-                    <span>Suchfunktion</span>
-                </div>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">🧠</span>
-                <div>
-                    <strong>Zusammenfassung Vorteile (für Kurzantwort):</strong>
-                    <ol style="margin-top:0.3rem;">
-                        <li>Einheitliche & detaillierte Dokumentation</li>
-                        <li>Effizientere Störungsbeseitigung</li>
-                        <li>Entlastung durch Knowledge-Base & Suchfunktion</li>
-                        <li>Automatisierung von Routineaufgaben → höhere Produktivität</li>
-                        <li>Höhere Kundenzufriedenheit durch zentralisiertes Monitoring & Eskalation</li>
-                        <li>Regelbasierte Automatisierungen statt Einzelentscheidungen</li>
-                        <li>Klare Kategorisierung & Priorisierung</li>
-                    </ol>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== SECTION 4: PROBLEM MANAGEMENT ==================== -->
-        <section class="section orange wichtig" id="problem">
-            <h2><span class="icon orange">🔍</span> Problem Management & DMAIC-Zyklus</h2>
-
-            <h3>Was ist Problem-Management?</h3>
-            <div class="info-card orange">
-                <strong>Definition:</strong>
-                <p>Problem-Management ist der Prozess der <strong>Identifizierung und Verwaltung der Ursachen</strong> von Incidents. Ziel: Ursachen identifizieren, verstehen und die <strong>beste Methode zur dauerhaften Beseitigung</strong> finden.</p>
-            </div>
-
-            <h3>Wann wird ein Incident zum „Problem"?</h3>
-            <div class="grid-3">
-                <div class="card-mini" style="border-color:var(--warning);">
-                    <div class="number" style="color:var(--warning);">🔄</div>
-                    <div class="label"><strong>Wiederkehrend</strong><br>Identische/ähnliche Störungen treten wiederholt auf</div>
-                </div>
-                <div class="card-mini" style="border-color:var(--danger);">
-                    <div class="number" style="color:var(--danger);">🐛</div>
-                    <div class="label"><strong>Known Error</strong><br>Bekannte, dokumentierte Fehler</div>
-                </div>
-                <div class="card-mini" style="border-color:var(--gray);">
-                    <div class="number" style="color:var(--gray);">❓</div>
-                    <div class="label"><strong>Unbekannt</strong><br>Nicht behebbar, Ursache unklar</div>
-                </div>
-            </div>
-
-            <h3>Incident Management vs. Problem Management</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <rect x="20" y="15" width="290" height="150" rx="14" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="165" y="42" text-anchor="middle" font-size="12" font-weight="bold" fill="#047857">🎫 Incident Management</text>
-                    <line x1="40" y1="52" x2="290" y2="52" stroke="#6ee7b7" stroke-width="1"/>
-                    <text x="50" y="72" font-size="9.5" fill="#064e3b">• Schnelle Wiederherstellung</text>
-                    <text x="50" y="90" font-size="9.5" fill="#064e3b">• Symptombehandlung</text>
-                    <text x="50" y="108" font-size="9.5" fill="#064e3b">• Reaktiv: „Feuer löschen" 🧯</text>
-                    <text x="50" y="126" font-size="9.5" fill="#064e3b">• Einzelne Störung beheben</text>
-                    <text x="50" y="148" font-size="8.5" fill="#6b7280">→ Workaround / Sofortlösung</text>
-                    <text x="350" y="95" text-anchor="middle" font-size="15" font-weight="bold" fill="#64748b">VS</text>
-                    <rect x="390" y="15" width="290" height="150" rx="14" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="535" y="42" text-anchor="middle" font-size="12" font-weight="bold" fill="#92400e">🔍 Problem Management</text>
-                    <line x1="410" y1="52" x2="660" y2="52" stroke="#fcd34d" stroke-width="1"/>
-                    <text x="410" y="72" font-size="9.5" fill="#78350f">• Ursache identifizieren</text>
-                    <text x="410" y="90" font-size="9.5" fill="#78350f">• Ursachenbekämpfung</text>
-                    <text x="410" y="108" font-size="9.5" fill="#78350f">• Proaktiv: „Feuer verhindern" 🛡️</text>
-                    <text x="410" y="126" font-size="9.5" fill="#78350f">• Wiederkehrende Muster beseitigen</text>
-                    <text x="410" y="148" font-size="8.5" fill="#6b7280">→ Dauerhafte Lösung / Root Cause</text>
-                </svg>
-            </div>
-
-            <h3>⭐ Der DMAIC-Zyklus (5 Phasen) ⭐</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" style="max-width:420px;">
-                    <!-- Circular arrows -->
-                    <path d="M 250 55 A 130 130 0 0 1 375 145" fill="none" stroke="#667eea" stroke-width="4"/>
-                    <path d="M 385 165 A 130 130 0 0 1 345 310" fill="none" stroke="#f5576c" stroke-width="4"/>
-                    <path d="M 335 325 A 130 130 0 0 1 165 325" fill="none" stroke="#4facfe" stroke-width="4"/>
-                    <path d="M 155 310 A 130 130 0 0 1 115 165" fill="none" stroke="#43e97b" stroke-width="4"/>
-                    <path d="M 125 145 A 130 130 0 0 1 240 55" fill="none" stroke="#fa709a" stroke-width="4"/>
-                    <!-- Center -->
-                    <circle cx="250" cy="190" r="42" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
-                    <text x="250" y="185" text-anchor="middle" font-size="12" font-weight="bold" fill="#475569">DMAIC</text>
-                    <text x="250" y="200" text-anchor="middle" font-size="8" fill="#64748b">Zyklus</text>
-                    <!-- 1. DEFINE -->
-                    <circle cx="250" cy="35" r="33" fill="#667eea" stroke="#4338ca" stroke-width="2"/>
-                    <text x="250" y="32" text-anchor="middle" font-size="10" font-weight="bold" fill="white">DEFINE</text>
-                    <text x="250" y="46" text-anchor="middle" font-size="7" fill="#e0e7ff">Was ist das Problem?</text>
-                    <!-- 2. MEASURE -->
-                    <circle cx="400" cy="135" r="33" fill="#f5576c" stroke="#dc2626" stroke-width="2"/>
-                    <text x="400" y="131" text-anchor="middle" font-size="9" font-weight="bold" fill="white">MEASURE</text>
-                    <text x="400" y="145" text-anchor="middle" font-size="6.5" fill="#fecaca">Auswirkungen?</text>
-                    <!-- 3. ANALYZE -->
-                    <circle cx="360" cy="330" r="33" fill="#4facfe" stroke="#0284c7" stroke-width="2"/>
-                    <text x="360" y="326" text-anchor="middle" font-size="9" font-weight="bold" fill="white">ANALYZE</text>
-                    <text x="360" y="340" text-anchor="middle" font-size="6.5" fill="#e0f2fe">Kernursachen?</text>
-                    <!-- 4. IMPROVE -->
-                    <circle cx="140" cy="330" r="33" fill="#43e97b" stroke="#059669" stroke-width="2"/>
-                    <text x="140" y="326" text-anchor="middle" font-size="9" font-weight="bold" fill="white">IMPROVE</text>
-                    <text x="140" y="340" text-anchor="middle" font-size="6.5" fill="#d1fae5">Wie beseitigen?</text>
-                    <!-- 5. CONTROL -->
-                    <circle cx="100" cy="135" r="33" fill="#fa709a" stroke="#db2777" stroke-width="2"/>
-                    <text x="100" y="131" text-anchor="middle" font-size="9" font-weight="bold" fill="white">CONTROL</text>
-                    <text x="100" y="145" text-anchor="middle" font-size="6.5" fill="#fce7f3">Nachhaltigkeit?</text>
-                    <!-- Legend -->
-                    <rect x="100" y="380" width="300" height="30" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
-                    <text x="250" y="399" text-anchor="middle" font-size="8.5" fill="#475569">🔄 Zyklus wiederholt sich → Kont. Verbesserung</text>
-                </svg>
-            </div>
-
-            <div class="table-container">
-                <table class="table-styled orange">
-                    <thead><tr><th>#</th><th>Phase</th><th>Leitfrage</th><th>Beschreibung</th></tr></thead>
-                    <tbody>
-                        <tr><td><strong>1</strong></td><td style="color:#667eea;font-weight:700;">Define</td><td>Was ist das Problem?</td><td>Problem definieren, abgrenzen, Scope</td></tr>
-                        <tr><td><strong>2</strong></td><td style="color:#f5576c;font-weight:700;">Measure</td><td>Welche Prozessauswirkungen?</td><td>Daten sammeln, IST-Zustand messen</td></tr>
-                        <tr><td><strong>3</strong></td><td style="color:#4facfe;font-weight:700;">Analyze</td><td>Was sind die Kernursachen?</td><td>Root-Cause-Analyse durchführen</td></tr>
-                        <tr><td><strong>4</strong></td><td style="color:#43e97b;font-weight:700;">Improve</td><td>Wie beseitigen?</td><td>Lösung entwickeln & implementieren</td></tr>
-                        <tr><td><strong>5</strong></td><td style="color:#fa709a;font-weight:700;">Control</td><td>Nachhaltigkeit sichern?</td><td>Überwachen, Standards setzen</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">💡</span>
-                <div><strong>Merkhilfe DMAIC:</strong><br>
-                    <em>„<strong>D</strong>er <strong>M</strong>eister <strong>A</strong>nalysiert <strong>I</strong>mmer <strong>C</strong>lever"</em><br>
-                    Oder: <em>„<strong>D</strong>eutsche <strong>M</strong>eister <strong>A</strong>rbeiten <strong>I</strong>ntensiv &amp; <strong>C</strong>ool"</em>
-                </div>
-            </div>
-
-            <h3>Zusammenhang: Incident → Problem → DMAIC</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <rect x="10" y="25" width="130" height="50" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="75" y="47" text-anchor="middle" font-size="9" font-weight="bold" fill="#047857">🎫 Incidents</text>
-                    <text x="75" y="62" text-anchor="middle" font-size="7.5" fill="#475569">wiederholen sich</text>
-                    <path d="M 140 50 L 175 50" stroke="#64748b" stroke-width="2" marker-end="url(#arr4)"/>
-                    <rect x="180" y="25" width="130" height="50" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="2"/>
-                    <text x="245" y="47" text-anchor="middle" font-size="9" font-weight="bold" fill="#92400e">🔍 Problem</text>
-                    <text x="245" y="62" text-anchor="middle" font-size="7.5" fill="#475569">wird erkannt</text>
-                    <path d="M 310 50 L 345 50" stroke="#64748b" stroke-width="2" marker-end="url(#arr4)"/>
-                    <rect x="350" y="25" width="130" height="50" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="2"/>
-                    <text x="415" y="47" text-anchor="middle" font-size="9" font-weight="bold" fill="#5b21b6">🔄 DMAIC</text>
-                    <text x="415" y="62" text-anchor="middle" font-size="7.5" fill="#475569">Ursache beseitigen</text>
-                    <path d="M 480 50 L 515 50" stroke="#64748b" stroke-width="2" marker-end="url(#arr4)"/>
-                    <rect x="520" y="25" width="130" height="50" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="2"/>
-                    <text x="585" y="47" text-anchor="middle" font-size="9" font-weight="bold" fill="#047857">✅ Gelöst</text>
-                    <text x="585" y="62" text-anchor="middle" font-size="7.5" fill="#475569">Dauerhaft behoben</text>
-                    <defs><marker id="arr4" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#64748b"/></marker></defs>
-                </svg>
-            </div>
-        </section>
-
-        <!-- ==================== SECTION 5: KPI ==================== -->
-        <section class="section red" id="kpi">
-            <h2><span class="icon red">📊</span> KPI — Messung von IT-Dienstleistungen</h2>
-
-            <h3>Was sind KPIs?</h3>
-            <div class="info-card red">
-                <strong>KPI = Key Performance Indicator (Leistungskennzahl)</strong>
-                <p>KPIs messen, ob vereinbarte <strong>Service-Levels eingehalten</strong> oder übererfüllt werden. Objektive Grundlage für Bewertung der IT-Servicequalität.</p>
-                <p style="margin-top:0.3rem;"><strong>Warum wichtig?</strong> Ohne Messung kein Beweis ob SLAs eingehalten → Basis für Beschwerden & Vertragsstrafen.</p>
-            </div>
-
-            <h3>Aufgabe im Skript (Szenario)</h3>
-            <div class="info-card">
-                <strong>📧 E-Mail von A. Klein (Leiterin IT Services):</strong>
-                <p>Der Geschäftsführer der <strong>Berger AG</strong> beschwert sich: SLAs letzte Woche nicht erfüllt!</p>
-                <ul style="margin-top:0.3rem;">
-                    <li><strong>Aufgabe 1:</strong> Prüfen ob der Kunde Recht hat (Daten mit SLA vergleichen)</li>
-                    <li><strong>Aufgabe 2:</strong> „Top Servicemitarbeiter der Woche" küren</li>
-                </ul>
-                <p style="margin-top:0.3rem;"><em>→ Man muss IST-Werte mit SOLL-Werten (SLA-Kennzahlen) vergleichen!</em></p>
-            </div>
-
-            <h3>SLA-Kennzahlen (Dashboard)</h3>
-            <div class="diagram-container">
-                <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" style="max-width:600px;">
-                    <text x="350" y="22" text-anchor="middle" font-size="12" font-weight="bold" fill="#1e293b">📊 SLA-Kennzahlen — SOLL-Werte</text>
-                    <rect x="20" y="35" width="150" height="75" rx="12" fill="#f0f9ff" stroke="#bae6fd" stroke-width="2"/>
-                    <text x="95" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#2563eb">99,25%</text>
-                    <text x="95" y="80" text-anchor="middle" font-size="8" fill="#64748b">Verfügbarkeit/Jahr</text>
-                    <text x="95" y="98" text-anchor="middle" font-size="7" fill="#94a3b8">(≈65,7h Ausfall erlaubt)</text>
-                    <rect x="185" y="35" width="150" height="75" rx="12" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="2"/>
-                    <text x="260" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#059669">95%</text>
-                    <text x="260" y="80" text-anchor="middle" font-size="8" fill="#64748b">Anrufe beantwortet</text>
-                    <text x="260" y="98" text-anchor="middle" font-size="7" fill="#94a3b8">(verloren &lt;5%)</text>
-                    <rect x="350" y="35" width="150" height="75" rx="12" fill="#ede9fe" stroke="#c4b5fd" stroke-width="2"/>
-                    <text x="425" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#7c3aed">75%</text>
-                    <text x="425" y="80" text-anchor="middle" font-size="8" fill="#64748b">in ≤ 20 Sekunden</text>
-                    <text x="425" y="98" text-anchor="middle" font-size="7" fill="#94a3b8">Anrufannahme</text>
-                    <rect x="515" y="35" width="150" height="75" rx="12" fill="#fef3c7" stroke="#fde68a" stroke-width="2"/>
-                    <text x="590" y="62" text-anchor="middle" font-size="18" font-weight="800" fill="#d97706">90%</text>
-                    <text x="590" y="80" text-anchor="middle" font-size="8" fill="#64748b">in ≤ 40 Sekunden</text>
-                    <text x="590" y="98" text-anchor="middle" font-size="7" fill="#94a3b8">Anrufannahme</text>
-                    <!-- Prio Bars -->
-                    <text x="350" y="135" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">Problemlösung nach Priorität:</text>
-                    <rect x="40" y="148" width="180" height="22" rx="5" fill="#fee2e2"/>
-                    <rect x="40" y="148" width="162" height="22" rx="5" fill="#dc2626"/>
-                    <text x="121" y="163" text-anchor="middle" font-size="8" font-weight="bold" fill="white">Prio 1: 90% in 60min</text>
-                    <text x="228" y="163" font-size="7" fill="#991b1b">max 2d</text>
-                    <rect x="260" y="148" width="180" height="22" rx="5" fill="#fef3c7"/>
-                    <rect x="260" y="148" width="135" height="22" rx="5" fill="#d97706"/>
-                    <text x="327" y="163" text-anchor="middle" font-size="8" font-weight="bold" fill="white">Prio 2: 75% in 3h</text>
-                    <text x="448" y="163" font-size="7" fill="#92400e">max 3d</text>
-                    <rect x="480" y="148" width="180" height="22" rx="5" fill="#d1fae5"/>
-                    <rect x="480" y="148" width="126" height="22" rx="5" fill="#059669"/>
-                    <text x="543" y="163" text-anchor="middle" font-size="8" font-weight="bold" fill="white">Prio 3: 70% in 6h</text>
-                    <text x="615" y="163" font-size="7" fill="#047857">max 5d</text>
-                    <text x="350" y="198" text-anchor="middle" font-size="8.5" fill="#64748b">📱 Max. 10% Voicemail | 📅 Reporting: 5. Werktag/Monat</text>
-                </svg>
-            </div>
-
-            <h3>Verfügbarkeit berechnen</h3>
-            <div class="highlight-box">
-                <p style="font-size:clamp(0.85rem,2.5vw,1.1rem); text-align:center; margin:0.5rem 0; background:#f1f5f9; padding:0.7rem; border-radius:0.5rem;">
-                    <strong>Verfügbarkeit = (Gesamtzeit − Ausfallzeit) ÷ Gesamtzeit × 100%</strong>
-                </p>
-                <p style="margin-top:0.5rem;"><strong>Beispiel 99,25%/Jahr:</strong></p>
-                <ul>
-                    <li>Gesamtstunden = 365 × 24 = <strong>8.760h</strong></li>
-                    <li>Erlaubte Ausfallzeit = 8.760 × 0,0075 = <strong>65,7h/Jahr</strong></li>
-                    <li>= ca. <strong>5,5h pro Monat</strong> erlaubte Downtime</li>
-                </ul>
-            </div>
-
-            <h3>Servicezeiten</h3>
-            <div class="grid-3">
-                <div class="card-mini"><div class="number" style="color:var(--primary);">Mo–Fr</div><div class="label">07:00 – 20:00<br><small>(13h/Tag)</small></div></div>
-                <div class="card-mini"><div class="number" style="color:var(--warning);">Sa</div><div class="label">09:00 – 18:00<br><small>(9h)</small></div></div>
-                <div class="card-mini"><div class="number" style="color:var(--danger);">So/Feiertag</div><div class="label">Kein Betrieb</div></div>
-            </div>
-
-            <div class="memo-tip">
-                <span class="tip-icon">💡</span>
-                <div><strong>So prüfst du SLA-Einhaltung:</strong> IST-Wert mit SOLL-Wert vergleichen. Bsp: Wenn nur 92% Anrufe beantwortet → SLA verletzt (SOLL: 95%). „Top Mitarbeiter" = wer die besten individuellen Quoten hat (schnellste Lösung, höchste Erstlösungsrate).</div>
-            </div>
-        </section>
-
-        <!-- ==================== ZUSAMMENFASSUNG ==================== -->
-        <section class="section pink">
-            <h2><span class="icon" style="background:#fce7f3;">🎯</span> Cheat Sheet — Alles auf einen Blick</h2>
-
-            <div class="grid-2">
-                <div class="info-card red">
-                    <strong>🔴 DMAIC (auswendig!)</strong>
-                    <p>Define → Measure → Analyze → Improve → Control</p>
-                    <p><em>"Der Meister Analysiert Immer Clever"</em></p>
-                </div>
-                <div class="info-card orange">
-                    <strong>🟠 Lückentext-Wörter!</strong>
-                    <p style="font-size:0.78rem;">einheitlicher, detaillierter, effizienter beseitigt, entlastet, beschleunigt, Knowledge-Base, Suchfunktion, Ticket-Sortierungen, automatisiert, Produktivität, Kontaktaufnahme, zentralisierter, Eskalation, Automatisierungen, Priorisierungen</p>
-                </div>
-                <div class="info-card purple">
-                    <strong>🟣 SVS = 5 Komponenten</strong>
-                    <p>Leitprinzipien, Steuerung, Wertschöpfungskette, Kont. Verbesserung, Praktiken</p>
-                    <p><em>"Lisa Sucht Wertvolle Kunden Per..."</em></p>
-                </div>
-                <div class="info-card green">
-                    <strong>🟢 Incident vs. Problem</strong>
-                    <p>Incident = Symptom → schnell beheben<br>Problem = Ursache → dauerhaft beseitigen (DMAIC)</p>
-                </div>
-                <div class="info-card">
-                    <strong>🔵 SLA-Zahlen</strong>
-                    <p>99,25% | 95% | 75%/20s | 90%/40s</p>
-                    <p>P1: 90%/60min | P2: 75%/3h | P3: 70%/6h</p>
-                </div>
-                <div class="info-card" style="border-left-color:#ec4899;">
-                    <strong>💜 Vertragsebenen & -arten</strong>
-                    <p>SLA/OLA/UC + SLC (einseitig)</p>
-                    <p>Miet-/Werk-/Dienstvertrag</p>
-                </div>
-            </div>
-
-            <h3>Selbst-Check: Kann ich das?</h3>
-            <ul class="checklist">
-                <li>DMAIC-Phasen mit Leitfragen aufzählen</li>
-                <li>Lückentext (Vorteile Ticketsystem) korrekt ausfüllen</li>
-                <li>Incident vs. Problem unterscheiden & erklären</li>
-                <li>5 SVS-Komponenten nennen</li>
-                <li>3 Praktiken-Kategorien + je 3 Beispiele</li>
-                <li>SLA/OLA/UC erklären & unterscheiden</li>
-                <li>SLA vs. SLC Unterschied</li>
-                <li>Support-Level (1st, 2nd, 3rd) beschreiben</li>
-                <li>Relevante vs. irrelevante Ticket-Felder benennen</li>
-                <li>SLA-Kennzahlen & Verfügbarkeit berechnen</li>
-                <li>Vertragsarten (Miet/Werk/Dienst) zuordnen</li>
-                <li>IaaS/PaaS/SaaS mit Vor-/Nachteilen</li>
-                <li>8 Schritte Incident-Prozess</li>
-                <li>Eskalation (funktional vs. hierarchisch)</li>
-            </ul>
-
-            <div class="memo-tip" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0);">
-                <span class="tip-icon">🏆</span>
-                <div><strong>Du schaffst das! Letzte Tipps:</strong>
-                    <ul style="margin-top:0.3rem;">
-                        <li>Lückentext: mehrmals abdecken + ausfüllen üben</li>
-                        <li>DMAIC als Kreisbild im Kopf visualisieren</li>
-                        <li>Zahlenreihe: 99,25 → 95 → 90 → 75 → 70</li>
-                        <li>Ticket-Felder: Frage dich „Brauche ich das zum IDENTIFIZIEREN, LOKALISIEREN, KATEGORISIEREN oder PRIORISIEREN?"</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <div class="footer">
-            <p>Viel Erfolg bei der Schulaufgabe! 🍀</p>
-            <p style="font-size:0.75rem; margin-top:0.3rem;">Erstellt 20.05.2026 — BGP LF6 | Alle Inhalte aus Unterrichtsskripten</p>
-        </div>
+  <div class="card">
+    <h3>Bauelemente &amp; Schaltzeichen</h3>
+    <div class="symgrid">
+      <div class="sym">
+        <svg viewBox="0 0 100 60"><line class="wire" x1="2" y1="30" x2="30" y2="30"/><rect class="comp" x="30" y="18" width="40" height="24"/><line class="wire" x1="70" y1="30" x2="98" y2="30"/></svg>
+        <div class="cap">Widerstand R</div>
+      </div>
+      <div class="sym">
+        <svg viewBox="0 0 100 60"><line class="wire" x1="2" y1="30" x2="32" y2="30"/><circle class="comp" cx="50" cy="30" r="18"/><line class="wire" x1="37.3" y1="17.3" x2="62.7" y2="42.7"/><line class="wire" x1="62.7" y1="17.3" x2="37.3" y2="42.7"/><line class="wire" x1="68" y1="30" x2="98" y2="30"/></svg>
+        <div class="cap">Lampe</div>
+      </div>
+      <div class="sym">
+        <svg viewBox="0 0 100 64"><line class="wire" x1="2" y1="40" x2="30" y2="40"/><polygon class="comp" points="30,25 30,55 55,40"/><line class="wire" x1="55" y1="25" x2="55" y2="55"/><line class="wire" x1="55" y1="40" x2="98" y2="40"/><defs><marker id="ahled" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><polygon points="0,0 7,3.5 0,7" fill="#1c2430"/></marker></defs><line x1="42" y1="22" x2="52" y2="10" stroke="#1c2430" stroke-width="1.8" marker-end="url(#ahled)"/><line x1="52" y1="26" x2="62" y2="14" stroke="#1c2430" stroke-width="1.8" marker-end="url(#ahled)"/></svg>
+        <div class="cap">LED (Pfeile = Licht)</div>
+      </div>
+      <div class="sym">
+        <svg viewBox="0 0 100 60"><line class="wire" x1="2" y1="30" x2="40" y2="30"/><line x1="40" y1="9" x2="40" y2="51" stroke="#1c2430" stroke-width="2.4"/><line x1="52" y1="20" x2="52" y2="40" stroke="#1c2430" stroke-width="6"/><line class="wire" x1="52" y1="30" x2="98" y2="30"/><text class="lbl" x="26" y="14" font-size="13">+</text></svg>
+        <div class="cap">Spannungsquelle / Batterie</div>
+      </div>
+      <div class="sym">
+        <svg viewBox="0 0 100 60"><line class="wire" x1="2" y1="30" x2="32" y2="30"/><circle class="comp" cx="50" cy="30" r="18"/><text class="lbl" x="50" y="35" text-anchor="middle">A</text><line class="wire" x1="68" y1="30" x2="98" y2="30"/></svg>
+        <div class="cap">Amperemeter</div>
+      </div>
+      <div class="sym">
+        <svg viewBox="0 0 100 60"><line class="wire" x1="2" y1="30" x2="32" y2="30"/><circle class="comp" cx="50" cy="30" r="18"/><text class="lbl" x="50" y="35" text-anchor="middle">V</text><line class="wire" x1="68" y1="30" x2="98" y2="30"/></svg>
+        <div class="cap">Voltmeter</div>
+      </div>
     </div>
+    <ul>
+      <li><b>Widerstand:</b> begrenzt den Strom; Wert über Farbringe ablesbar (Tabelle unten).</li>
+      <li><b>Lampe:</b> ohmscher Verbraucher, wandelt elektrische Energie in Licht/Wärme.</li>
+      <li><b>LED:</b> Halbleiterdiode, leitet nur in <b>Durchlassrichtung</b>. Anode = + (langes Bein), Kathode = − (kurzes Bein, abgeflachte Seite). Braucht <b>immer</b> einen Vorwiderstand, typischer Nennstrom ≈ 20 mA.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Bezugspfeile (Spannung &amp; Strom)</h3>
+    <div class="figure">
+      <svg viewBox="0 0 390 200">
+        <defs><marker id="ahbz" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon class="ah" points="0,0 8,4 0,8"/></marker></defs>
+        <path class="wire" d="M70,45 H310"/>
+        <path class="wire" d="M310,45 V75"/>
+        <rect class="comp" x="296" y="75" width="28" height="60"/>
+        <path class="wire" d="M310,135 V160 H70"/>
+        <path class="wire" d="M70,45 V84"/>
+        <line x1="50" y1="84" x2="90" y2="84" stroke="#1c2430" stroke-width="2.4"/>
+        <line x1="58" y1="96" x2="82" y2="96" stroke="#1c2430" stroke-width="6"/>
+        <path class="wire" d="M70,96 V160"/>
+        <text class="lbl" x="95" y="80" font-size="13">+</text>
+        <line class="arrow" x1="160" y1="32" x2="218" y2="32" marker-end="url(#ahbz)"/>
+        <text class="lbl" x="183" y="22" fill="#c2410c">I</text>
+        <line class="arrow" x1="38" y1="82" x2="38" y2="140" marker-end="url(#ahbz)"/>
+        <text class="lbl" x="16" y="115" fill="#c2410c">U</text>
+        <line class="arrow" x1="346" y1="78" x2="346" y2="133" marker-end="url(#ahbz)"/>
+        <text class="lbl" x="356" y="110" fill="#c2410c">U<tspan font-size="10" dy="3">R</tspan></text>
+        <text class="lbl" x="284" y="110" text-anchor="end" font-size="13">R</text>
+      </svg>
+      <div class="cap"><b>Verbraucherpfeilsystem:</b> Am Verbraucher (R) zeigen Spannungs- und Strompfeil in <b>dieselbe</b> Richtung, an der Quelle entgegengesetzt.</div>
+    </div>
+    <ul>
+      <li><b>Spannungspfeil</b> zeigt von + nach − (vom höheren zum niedrigeren Potenzial).</li>
+      <li><b>Strompfeil</b> = technische Stromrichtung: außerhalb der Quelle von + nach −.</li>
+      <li>Teilspannungen in der Reihenschaltung werden alle <b>in Stromrichtung</b> eingezeichnet.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Reihenschaltung</h3>
+    <div class="formula">R_ges = R₁ + R₂ + …  |  I = überall gleich  |  U = U₁ + U₂ + …  (Maschenregel)</div>
+    <ul>
+      <li>Der <b>Strom</b> ist an jeder Stelle gleich groß (nur ein Pfad).</li>
+      <li>Die Gesamtspannung <b>teilt sich auf</b>: am <b>größten R</b> fällt die <b>größte Spannung</b> ab (U₁ = I · R₁).</li>
+      <li>Spannungsteiler-Regel: U₁ / U₂ = R₁ / R₂.</li>
+    </ul>
+    <div class="merk"><b>AB-Beispiel (gelöst):</b> U = 12 V, R₁ = 30 Ω, R₂ = 90 Ω →
+      R<sub>ges</sub> = 120 Ω, I = 12 V / 120 Ω = <b>0,1 A</b>.
+      Teilspannungen: U₁ = 0,1 · 30 = <b>3 V</b>, U₂ = 0,1 · 90 = <b>9 V</b> (3 + 9 = 12 ✓).<br>
+      b) Beide R verdoppelt → R<sub>ges</sub> = 240 Ω, I halbiert sich auf <b>0,05 A</b>.<br>
+      c) Nur R₁ verdoppelt → R<sub>ges</sub> steigt nur um 30 Ω auf 150 Ω, I = 12/150 = <b>0,08 A</b>.</div>
+  </div>
+
+  <div class="card">
+    <h3>Parallelschaltung &amp; Knotenregel</h3>
+    <div class="formula">1/R_ges = 1/R₁ + 1/R₂ + …   |   bei 2 R:  R_ges = (R₁ · R₂) / (R₁ + R₂)<br>U = überall gleich   |   I_ges = I₁ + I₂ + …</div>
+    <ul>
+      <li>Alle Zweige liegen an <b>derselben Spannung</b>.</li>
+      <li>Der Gesamtstrom teilt sich auf: durch den <b>kleineren R</b> fließt der <b>größere Strom</b>.</li>
+      <li>R<sub>ges</sub> ist immer <b>kleiner als der kleinste</b> Einzelwiderstand – guter Plausibilitäts-Check!</li>
+    </ul>
+    <div class="merk"><b>Knotenregel (1. Kirchhoffsches Gesetz):</b> An jedem Knoten gilt
+    Σ zufließende Ströme = Σ abfließende Ströme (Summe aller Ströme = 0; rein = +, raus = −).<br>
+    <b>AB-Beispiel:</b> zufließend I₁ = 2 A, I₂ = 1 A, I₃ = 0,5 A; abfließend I₄ = 0,5 A und I₅
+    → I₅ = (2 + 1 + 0,5) − 0,5 = <b>3 A</b>.</div>
+    <div class="merk"><b>Maschenregel (2. Kirchhoff):</b> In jeder geschlossenen Masche ist die Summe aller Spannungen null → in der Reihenschaltung: U<sub>Quelle</sub> = U₁ + U₂ + …</div>
+  </div>
+
+  <div class="card">
+    <h3>Spannungs- und Strommessung</h3>
+    <div class="figure">
+      <svg viewBox="0 0 410 200">
+        <path class="wire" d="M70,45 H141"/>
+        <circle class="comp" cx="159" cy="45" r="17"/><text class="lbl" x="159" y="50" text-anchor="middle">A</text>
+        <path class="wire" d="M177,45 H310"/>
+        <path class="wire" d="M310,45 V75"/>
+        <rect class="comp" x="296" y="75" width="28" height="60"/>
+        <text class="lbl" x="288" y="110" text-anchor="end" font-size="13">R</text>
+        <path class="wire" d="M310,135 V160 H70"/>
+        <path class="wire" d="M70,45 V84"/>
+        <line x1="50" y1="84" x2="90" y2="84" stroke="#1c2430" stroke-width="2.4"/>
+        <line x1="58" y1="96" x2="82" y2="96" stroke="#1c2430" stroke-width="6"/>
+        <path class="wire" d="M70,96 V160"/>
+        <text class="lbl" x="95" y="80" font-size="13">+</text>
+        <path class="wire" d="M310,45 H368 V88"/>
+        <circle class="comp" cx="368" cy="105" r="17"/><text class="lbl" x="368" y="110" text-anchor="middle">V</text>
+        <path class="wire" d="M368,122 V160 H310"/>
+      </svg>
+      <div class="cap"><b>Amperemeter</b> liegt in Reihe im Strompfad · <b>Voltmeter</b> liegt parallel zum Bauteil.</div>
+    </div>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>Anschluss</th><th>Innenwiderstand (ideal)</th><th>Warum?</th></tr>
+      <tr><td><b>Voltmeter</b></td><td>parallel zum Bauteil</td><td>sehr hochohmig (→ ∞)</td><td>damit kein Strom über das Messgerät abzweigt</td></tr>
+      <tr><td><b>Amperemeter</b></td><td>in Reihe im Stromkreis</td><td>sehr niederohmig (→ 0 Ω)</td><td>damit es den Strom nicht zusätzlich begrenzt</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3>LED-Vorwiderstand berechnen</h3>
+    <div class="formula">R_V = (U_Quelle − U_LED) / I_LED</div>
+    <p><b>Vorgehen:</b> 1) U<sub>LED</sub> (Durchlassspannung) aus der Kennlinie bei 20 mA ablesen →
+    2) in die Formel einsetzen → 3) aus der E-Reihe den <b>nächstgrößeren Normwert</b> wählen
+    (dann bleibt I sicher unter 20 mA).</p>
+    <div class="merk"><b>Warum überhaupt?</b> Eine LED begrenzt den Strom selbst kaum (sehr steile Kennlinie).
+    Ohne Vorwiderstand steigt der Strom weit über den Nennstrom → die LED wird thermisch zerstört.</div>
+    <h4>AB-Aufgabe 2: LEDs am Arduino-Uno-Pin (U = 5 V, I = 20 mA = 0,02 A)</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Farbe</th><th>typ. U<sub>LED</sub> (Kennlinie)</th><th>Rechnung</th><th>R<sub>V</sub></th><th>Normwert (nächstgrößer)</th></tr>
+      <tr><td>rot</td><td>≈ 2,0 V</td><td>(5 − 2,0) / 0,02</td><td>150 Ω</td><td>150 Ω</td></tr>
+      <tr><td>gelb</td><td>≈ 2,1 V</td><td>(5 − 2,1) / 0,02</td><td>145 Ω</td><td>150 Ω</td></tr>
+      <tr><td>grün</td><td>≈ 3,2 V <span class="small">(lt. AB-Kennlinie; klassische grüne LED: 2,2 V → 140 Ω → 150 Ω)</span></td><td>(5 − 3,2) / 0,02</td><td>90 Ω</td><td>100 Ω</td></tr>
+      <tr><td>weiß</td><td>≈ 3,4 V</td><td>(5 − 3,4) / 0,02</td><td>80 Ω</td><td>82 Ω (knapp) / sicher 100 Ω</td></tr>
+    </table></div>
+    <p class="small">Die abgelesenen U<sub>LED</sub>-Werte dürfen leicht abweichen – entscheidend sind Formel, Rechenweg und das Aufrunden auf den Normwert.</p>
+    <details class="sol"><summary>AB-Aufgabe 4: U_LED aus dem Experiment zurückrechnen (Beispielzeile rot)</summary><div class="inner">
+      344 Ω = (9 V − U<sub>LED</sub>) / 0,02 A → U<sub>LED</sub> = 9 V − 344 Ω · 0,02 A = 9 − 6,88 = <b>2,12 V</b>.
+      Passt gut zum Kennlinienwert für Rot (≈ 2 V). Gleiches Umstellen für gelb/weiß/grün mit deinen Tinkercad-Werten.
+    </div></details>
+    <details class="sol"><summary>AB-Aufgabe 8 b) + c): LED 1,8 V / 0,015 A an 5,5 V</summary><div class="inner">
+      b) R<sub>V</sub> = (5,5 − 1,8) / 0,015 = 3,7 / 0,015 ≈ <b>246,7 Ω</b><br>
+      c) Nächstgrößerer Wert aus der Bauteiltabelle: <b>270 Ω</b> (220 Ω wäre zu klein: I = 3,7/220 ≈ 16,8 mA &gt; 15 mA).
+      Kontrolle mit 270 Ω: I = 3,7/270 ≈ 13,7 mA ✓
+    </div></details>
+  </div>
+
+  <div class="card">
+    <h3>Farbcodierung von Widerständen (4 Ringe)</h3>
+    <p>Ring 1 + Ring 2 = Ziffern · Ring 3 = Multiplikator · Ring 4 = Toleranz.</p>
+    <div class="tablewrap"><table>
+      <tr><th>Farbe</th><th>Ziffer</th><th>Multiplikator</th><th>Toleranz</th></tr>
+      <tr><td>Schwarz</td><td>0</td><td>× 1</td><td>–</td></tr>
+      <tr><td>Braun</td><td>1</td><td>× 10</td><td>± 1 %</td></tr>
+      <tr><td>Rot</td><td>2</td><td>× 100</td><td>± 2 %</td></tr>
+      <tr><td>Orange</td><td>3</td><td>× 1 kΩ</td><td>–</td></tr>
+      <tr><td>Gelb</td><td>4</td><td>× 10 kΩ</td><td>–</td></tr>
+      <tr><td>Grün</td><td>5</td><td>× 100 kΩ</td><td>± 0,5 %</td></tr>
+      <tr><td>Blau</td><td>6</td><td>× 1 MΩ</td><td>± 0,25 %</td></tr>
+      <tr><td>Violett (Lila)</td><td>7</td><td>× 10 MΩ</td><td>± 0,1 %</td></tr>
+      <tr><td>Grau</td><td>8</td><td>–</td><td>± 0,05 %</td></tr>
+      <tr><td>Weiß</td><td>9</td><td>–</td><td>–</td></tr>
+      <tr><td>Gold</td><td>–</td><td>× 0,1</td><td>± 5 %</td></tr>
+      <tr><td>Silber</td><td>–</td><td>× 0,01</td><td>± 10 %</td></tr>
+    </table></div>
+    <details class="sol"><summary>AB-Aufgabe 5: Farbringe für 470 Ω und 2,7 kΩ</summary><div class="inner">
+      <b>470 Ω:</b> Gelb (4) – Violett (7) – Braun (× 10) – Gold (± 5 %)<br>
+      <b>2,7 kΩ = 2700 Ω:</b> Rot (2) – Violett (7) – Rot (× 100) – Gold (± 5 %)
+    </div></details>
+  </div>
+
+  <div class="card">
+    <h3>Komplette Lösungen: AB Parallelschaltung</h3>
+    <details class="sol"><summary>Aufgabe 1 a–c (Gerät 100 Ω an 9 V)</summary><div class="inner">
+      <b>a)</b> I = U/R = 9 V / 100 Ω = <b>0,09 A = 90 mA</b><br>
+      <b>b)</b> Zweites gleiches Gerät parallel: beide liegen an 9 V → I₁ = I₂ = 90 mA,
+      I<sub>ges</sub> = I₁ + I₂ = <b>180 mA</b> (R<sub>ges</sub> = 50 Ω).<br>
+      <b>c)</b> R₂ = 50 Ω: I₂ = 9/50 = <b>180 mA</b>, I<sub>ges</sub> = 90 + 180 = <b>270 mA</b>
+      (Check: R<sub>ges</sub> = 100·50/150 ≈ 33,3 Ω → 9 V / 33,3 Ω ≈ 0,27 A ✓).
+    </div></details>
+    <details class="sol"><summary>Aufgabe 3 a (U = 9 V, I_ges = 200 mA, I₂ = 150 mA)</summary><div class="inner">
+      Knotenregel: I₁ = I<sub>ges</sub> − I₂ = 200 − 150 = <b>50 mA</b>.<br>
+      R₁ = U / I₁ = 9 V / 0,05 A = <b>180 Ω</b> &nbsp;·&nbsp; R₂ = 9 V / 0,15 A = <b>60 Ω</b>.
+    </div></details>
+    <details class="sol"><summary>Aufgabe 4 (R₁ = 250 Ω, R₂ = 4 · R₁, I_ges = 50 mA)</summary><div class="inner">
+      R₂ = 1000 Ω → R<sub>ges</sub> = (250 · 1000) / 1250 = <b>200 Ω</b>.<br>
+      U = I<sub>ges</sub> · R<sub>ges</sub> = 0,05 A · 200 Ω = <b>10 V</b>.<br>
+      I₁ = 10/250 = <b>40 mA</b>, I₂ = 10/1000 = <b>10 mA</b> (40 + 10 = 50 ✓).
+    </div></details>
+    <details class="sol"><summary>Aufgabe 5* (U₀ = 10 V, R₁ = 38 Ω in Reihe zu R₂ ∥ R₃ mit 20 Ω / 30 Ω)</summary><div class="inner">
+      R₂₃ = (20 · 30) / 50 = <b>12 Ω</b> → R<sub>ges</sub> = 38 + 12 = <b>50 Ω</b> → I<sub>ges</sub> = 10/50 = <b>0,2 A</b>.<br>
+      U₁ = 0,2 · 38 = <b>7,6 V</b>; U₂ = U₃ = 0,2 · 12 = <b>2,4 V</b> (7,6 + 2,4 = 10 ✓).<br>
+      I₂ = 2,4/20 = <b>0,12 A</b>; I₃ = 2,4/30 = <b>0,08 A</b> (0,12 + 0,08 = 0,2 ✓).
+    </div></details>
+  </div>
+</section>
+
+<!-- ================= 2 MQTT ================= -->
+<section id="mqtt">
+  <div class="sec-head"><span class="num">02</span><h2>MQTT</h2></div>
+  <p class="sec-sub">Definition &amp; Eigenschaften · Publish/Subscribe · Topics &amp; Wildcards · QoS 0/1/2 · Last Will</p>
+
+  <div class="card">
+    <h3>Was ist MQTT?</h3>
+    <p><b>MQTT</b> (Message Queuing Telemetry Transport) ist ein <b>leichtgewichtiges
+    Publish/Subscribe-Nachrichtenprotokoll</b> für IoT / Machine-to-Machine-Kommunikation.</p>
+    <ul>
+      <li>Läuft über <b>TCP/IP</b> · Standardports: <b>1883</b> (unverschlüsselt) und <b>8883</b> (TLS).</li>
+      <li><b>Sehr geringer Overhead</b> (Header ab 2 Byte) → ideal für schwache Netze, Mikrocontroller, Batteriebetrieb.</li>
+      <li>Zentraler <b>Broker</b> (z.&nbsp;B. Mosquitto) vermittelt alle Nachrichten über <b>Topics</b>.</li>
+      <li>Features: <b>QoS 0–2</b>, <b>Retained Messages</b> (Broker merkt sich letzte Nachricht pro Topic), <b>Last Will</b>.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Publish/Subscribe statt Client–Server</h3>
+    <p>Sender (<b>Publisher</b>) und Empfänger (<b>Subscriber</b>) kennen sich <b>nicht</b> –
+    sie sind über den Broker und Topics <b>entkoppelt</b>.</p>
+    <div class="merk"><b>Beispiel Temperatursensor:</b> Der Sensor published alle 10 s auf
+    <code>haus/eg/wohnzimmer/temperatur</code>. Display, App und Datenbank subscriben dasselbe Topic –
+    der Sensor muss keinen der Empfänger kennen, neue Empfänger kommen ohne Änderung am Sensor dazu.</div>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>Client–Server (z. B. HTTP)</th><th>Publish/Subscribe (MQTT)</th></tr>
+      <tr><td>Kommunikation</td><td>Client fragt aktiv beim Server an (Request/Response)</td><td>Broker pusht Nachrichten an alle Subscriber</td></tr>
+      <tr><td>Kopplung</td><td>Client muss Server-Adresse kennen</td><td>Teilnehmer kennen nur Broker + Topic</td></tr>
+      <tr><td>1-zu-n</td><td>aufwendig (Polling)</td><td>eingebaut: beliebig viele Subscriber</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3>Topics &amp; Wildcards</h3>
+    <p>Topics sind hierarchische, <b>case-sensitive</b> UTF-8-Pfade, Ebenen getrennt durch <code>/</code>:</p>
+    <pre class="term">haus/eg/wohnzimmer/temperatur
+haus/og/kueche/luftfeuchtigkeit</pre>
+    <div class="tablewrap"><table>
+      <tr><th>Wildcard</th><th>Bedeutung</th><th>Beispiel-Subscribe</th><th>matcht</th><th>matcht NICHT</th></tr>
+      <tr><td><code>+</code></td><td>genau <b>eine</b> Ebene</td><td><code>haus/+/temperatur</code></td><td><code>haus/eg/temperatur</code></td><td><code>haus/eg/wz/temperatur</code></td></tr>
+      <tr><td><code>#</code></td><td><b>beliebig viele</b> Ebenen, nur am <b>Ende</b></td><td><code>haus/#</code></td><td>alles unterhalb von <code>haus</code></td><td><code>garten/...</code></td></tr>
+    </table></div>
+    <div class="warn"><b>Prüfungsklassiker:</b> Wildcards sind <b>nur beim Subscribe</b> erlaubt,
+    <b>nie beim Publish</b>! Und <code>#</code> darf nur als letztes Zeichen stehen.</div>
+    <div class="merk"><b>Best Practices:</b> kein führender <code>/</code>, Kleinschreibung,
+    konkrete Struktur von grob nach fein (Ort → Raum → Messgröße).</div>
+  </div>
+
+  <div class="card">
+    <h3>Quality of Service (QoS)</h3>
+    <div class="tablewrap"><table>
+      <tr><th>QoS</th><th>Garantie</th><th>Paketfluss</th><th>Typischer Einsatz</th></tr>
+      <tr><td><b>0</b></td><td>höchstens einmal („fire &amp; forget“)</td><td>PUBLISH – keine Bestätigung</td><td>unkritische Sensordaten im Sekundentakt (Außentemperatur)</td></tr>
+      <tr><td><b>1</b></td><td>mindestens einmal – <b>Duplikate möglich</b></td><td>PUBLISH → <b>PUBACK</b>; ohne PUBACK wird erneut gesendet</td><td>wichtige Messwerte, bei denen Doppelte ok sind</td></tr>
+      <tr><td><b>2</b></td><td>genau einmal (höchster Overhead)</td><td>PUBLISH → <b>PUBREC</b> → <b>PUBREL</b> → <b>PUBCOMP</b></td><td>kritische Befehle: Türschloss, Abrechnung</td></tr>
+    </table></div>
+    <p class="small"><b>Hinweis:</b> Das Lösungsblatt beschreibt QoS 2 als „Three-Way-Handshake wie bei TCP“ –
+    gemeint ist der obige 4-Paket-Austausch (nach dem ersten PUBLISH folgen 3 Bestätigungsschritte).</p>
+    <details class="sol"><summary>Merkhilfe QoS wählen</summary><div class="inner">
+      Verliert man nichts Wichtiges, wenn eine Nachricht fehlt? → <b>QoS 0</b>.
+      Darf sie doppelt ankommen, aber nicht fehlen? → <b>QoS 1</b>.
+      Muss sie exakt einmal ankommen? → <b>QoS 2</b>.
+    </div></details>
+  </div>
+
+  <div class="card">
+    <h3>Last Will (Testament)</h3>
+    <ul>
+      <li>Wird vom Client <b>beim CONNECT</b> beim Broker hinterlegt: Topic, Payload, QoS, Retain-Flag.</li>
+      <li>Der Broker veröffentlicht die Nachricht <b>nur bei unsauberem Verbindungsabbruch</b>
+        (Keep-Alive-Timeout, Netzwerkfehler, Stromausfall) – <b>nicht</b> bei sauberem <code>DISCONNECT</code>.</li>
+    </ul>
+    <div class="merk"><b>Typische Anwendung – Statusüberwachung:</b> Beim Verbinden published das Gerät
+    <code>geraet/status = "online"</code> (retained). Als Last Will hinterlegt es
+    <code>geraet/status = "offline"</code> (retained). Fällt das Gerät aus, sehen alle Subscriber sofort „offline“.</div>
+  </div>
+
+  <div class="card">
+    <h3>Sicherheit (kurz)</h3>
+    <ul>
+      <li><b>TLS</b> verwenden (Port 8883) statt Klartext.</li>
+      <li><b>Authentifizierung</b> (Benutzer/Passwort oder Zertifikate) am Broker aktivieren.</li>
+      <li><b>Topic-Rechte (ACLs):</b> Clients dürfen nur ihre eigenen Topics lesen/schreiben.</li>
+      <li>Broker und Geräte aktuell halten (Updates).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 3 LINUX ================= -->
+<section id="linux">
+  <div class="sec-head"><span class="num">03</span><h2>Linux</h2></div>
+  <p class="sec-sub">ssh · Grundbefehle · Löschen · Suchen · man, Pipes &amp; Umleitungen · ls -l · versteckte Dateien · Dateinamen &amp; Endungen</p>
+
+  <div class="card">
+    <h3>ssh – sichere Fernverbindung</h3>
+    <p><b>ssh</b> (Secure Shell) baut eine <b>verschlüsselte</b> Terminalverbindung zu einem entfernten
+    Rechner auf (z.&nbsp;B. zum Raspberry Pi). Standardport: <b>22</b>.</p>
+    <pre class="term"><span class="c"># Als Benutzer pi am Host 192.168.1.50 anmelden</span>
+ssh pi@192.168.1.50
+<span class="c"># Anderer Port</span>
+ssh -p 2222 pi@192.168.1.50
+<span class="c"># Datei auf den Pi kopieren (scp nutzt ssh)</span>
+scp datei.txt pi@192.168.1.50:/home/pi/</pre>
+    <p class="small">Authentifizierung per Passwort oder (besser) per <b>SSH-Key</b> (Public Key auf dem Server, Private Key bleibt lokal).</p>
+  </div>
+
+  <div class="card">
+    <h3>Grundbefehle (AB Dateischiebereien)</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Befehl</th><th>Bedeutung</th><th>Beispiel</th></tr>
+      <tr><td><code>pwd</code></td><td>aktuelles Verzeichnis anzeigen</td><td><code>pwd</code></td></tr>
+      <tr><td><code>ls</code></td><td>Inhalt auflisten (<code>-l</code> Details, <code>-a</code> auch versteckte)</td><td><code>ls -la</code></td></tr>
+      <tr><td><code>cd</code></td><td>Verzeichnis wechseln (<code>cd ~</code> = Home, <code>cd ..</code> = hoch)</td><td><code>cd /etc</code></td></tr>
+      <tr><td><code>touch</code></td><td>leere Datei anlegen</td><td><code>touch ~/uebung3</code></td></tr>
+      <tr><td><code>mkdir</code></td><td>Verzeichnis anlegen</td><td><code>mkdir ~/Vorlesung</code></td></tr>
+      <tr><td><code>cp</code></td><td>kopieren (<code>-r</code> für Verzeichnisse!)</td><td><code>cp -r Vorlesung ~/Vorlesung-OS</code></td></tr>
+      <tr><td><code>mv</code></td><td>verschieben <b>oder</b> umbenennen</td><td><code>mv uebung3 Vorlesung/</code></td></tr>
+      <tr><td><code>rm</code></td><td>Datei löschen (<code>-r</code> rekursiv)</td><td><code>rm alt.txt</code></td></tr>
+      <tr><td><code>cat / less</code></td><td>Dateiinhalt anzeigen / blättern</td><td><code>less rootverzeichnis.txt</code></td></tr>
+      <tr><td><code>nano</code></td><td>Datei im Editor öffnen</td><td><code>nano notizen.txt</code></td></tr>
+    </table></div>
+    <details class="sol"><summary>Musterlösung AB Dateischiebereien (Kernbefehle)</summary><div class="inner">
+      <pre class="term"><span class="c"># Datei uebung3 im Home anlegen</span>
+touch ~/uebung3
+<span class="c"># Verzeichnis Vorlesung anlegen</span>
+mkdir ~/Vorlesung
+<span class="c"># Inhalt von / in Datei schreiben (überschreiben mit &gt;)</span>
+ls / &gt; ~/rootverzeichnis.txt
+<span class="c"># Datei verschieben</span>
+mv ~/uebung3 ~/Vorlesung/
+<span class="c"># Verzeichnis kopieren: -r ist Pflicht!</span>
+cp -r ~/Vorlesung ~/Vorlesung-OS
+<span class="c"># Datei suchen</span>
+find ~ -name "uebung3"
+<span class="c"># Zeilen mit "bin" in Datei suchen</span>
+grep bin ~/rootverzeichnis.txt</pre>
+    </div></details>
+  </div>
+
+  <div class="card">
+    <h3>Verzeichnisse löschen</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Befehl</th><th>Löscht</th></tr>
+      <tr><td><code>rmdir ordner</code></td><td>nur <b>leere</b> Verzeichnisse</td></tr>
+      <tr><td><code>rm -r ordner</code></td><td>Verzeichnis <b>mitsamt Inhalt</b> (rekursiv)</td></tr>
+      <tr><td><code>rm -rf ordner</code></td><td>wie oben, ohne Nachfragen (<b>Vorsicht!</b>)</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3>Suchen: find &amp; grep</h3>
+    <ul>
+      <li><code>find</code> sucht <b>Dateien/Verzeichnisse nach Name</b> (rekursiv ab Startpfad).</li>
+      <li><code>grep</code> sucht <b>Text innerhalb von Dateien</b>.</li>
+    </ul>
+    <pre class="term"><span class="c"># Alle .txt im Home inkl. Unterordner</span>
+find ~ -name "*.txt"
+<span class="c"># Zeilen mit "fehler" in log.txt (-i: Groß/klein egal, -n: Zeilennummer)</span>
+grep -in fehler log.txt
+<span class="c"># Rekursiv in allen Dateien eines Ordners suchen</span>
+grep -r "mqtt" ~/projekt/</pre>
+  </div>
+
+  <div class="card">
+    <h3>man-Pages, Pipes &amp; Umleitungen</h3>
+    <ul>
+      <li><code>man befehl</code> öffnet die Anleitung. Navigation: <b>q</b> beenden, <b>/suchwort</b> suchen, <b>n</b> nächster Treffer.</li>
+      <li><code>|</code> (Pipe): Ausgabe eines Befehls wird Eingabe des nächsten → <code>ls /etc | grep conf</code></li>
+      <li><code>&gt;</code> schreibt Ausgabe in Datei und <b>überschreibt</b> sie.</li>
+      <li><code>&gt;&gt;</code> <b>hängt</b> die Ausgabe <b>an</b> die Datei an.</li>
+    </ul>
+    <pre class="term">ls /etc &gt; liste.txt    <span class="c"># neu schreiben / überschreiben</span>
+ls /home &gt;&gt; liste.txt  <span class="c"># anhängen</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>ls -l verstehen</h3>
+    <div class="lsl">
+      <span class="s1">d</span><span class="s2">rwx</span><span class="s3">r-x</span><span class="s4">r-x</span>
+      <span class="s5">2</span> <span class="s6">root</span> <span class="s7">root</span>
+      <span class="s8">4096</span> <span class="s9">Mar 21 10:15</span> <span class="s10">bin</span>
+    </div>
+    <ul class="legend">
+      <li><span class="dot s1"></span><b>Typ:</b> <code>d</code> Verzeichnis, <code>-</code> Datei, <code>l</code> Link</li>
+      <li><span class="dot s2"></span><b>Rechte Besitzer:</b> r lesen, w schreiben, x ausführen</li>
+      <li><span class="dot s3"></span><b>Rechte Gruppe</b></li>
+      <li><span class="dot s4"></span><b>Rechte Andere</b></li>
+      <li><span class="dot s5"></span><b>Anzahl Hardlinks</b></li>
+      <li><span class="dot s6"></span><b>Besitzer</b></li>
+      <li><span class="dot s7"></span><b>Gruppe</b></li>
+      <li><span class="dot s8"></span><b>Größe in Bytes</b></li>
+      <li><span class="dot s9"></span><b>Datum der letzten Änderung</b></li>
+      <li><span class="dot s10"></span><b>Name</b></li>
+    </ul>
+    <div class="merk"><b>Beispiel:</b> <code>-rw-r--r--</code> = normale Datei; Besitzer darf lesen+schreiben,
+    Gruppe und alle anderen dürfen nur lesen. Bei Verzeichnissen heißt <code>x</code>: „darf hineinwechseln“.</div>
+  </div>
+
+  <div class="card">
+    <h3>Versteckte Dateien, Leerzeichen, Dateiendungen</h3>
+    <ul>
+      <li><b>Versteckte Dateien</b> beginnen mit <code>.</code> (z. B. <code>.test</code>) → nur mit <code>ls -a</code> sichtbar.
+        Dabei erscheinen auch <code>.</code> (aktuelles Verzeichnis) und <code>..</code> (übergeordnetes Verzeichnis).</li>
+      <li><b>Leerzeichen im Namen:</b> Anführungszeichen oder Backslash:
+        <code>less "Meine Notizen.txt"</code> oder <code>less Meine\ Notizen.txt</code> (Tab-Vervollständigung hilft).</li>
+      <li><b>Dateiendungen:</b> Unter <b>Linux nur Konvention</b> – der Typ wird am Inhalt erkannt
+        (<code>file datei</code>, „Magic Bytes“), ausführbar macht das x-Recht.
+        Unter <b>Windows</b> bestimmt die Endung die Programmverknüpfung (.docx → Word).</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 4 RASPBERRY PI ================= -->
+<section id="raspi">
+  <div class="sec-head"><span class="num">04</span><h2>Raspberry Pi</h2></div>
+  <p class="sec-sub">Vorteile gegenüber Arduino · Verbindungsarten Pi ↔ Arduino</p>
+
+  <div class="card">
+    <h3>Raspberry Pi vs. Arduino</h3>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>Raspberry Pi</th><th>Arduino (Uno)</th></tr>
+      <tr><td>Typ</td><td>vollwertiger <b>Einplatinen-Computer</b></td><td><b>Mikrocontroller</b>-Board</td></tr>
+      <tr><td>Betriebssystem</td><td>Linux (Raspberry Pi OS) – <b>Multitasking</b></td><td>kein OS – ein Programm in Endlosschleife</td></tr>
+      <tr><td>Leistung</td><td>GHz-CPU, mehrere GB RAM</td><td>16 MHz, 2 KB RAM</td></tr>
+      <tr><td>Netzwerk</td><td>LAN/WLAN/Bluetooth <b>onboard</b></td><td>nur mit Zusatz-Shield/Modul</td></tr>
+      <tr><td>Programmierung</td><td>beliebige Sprachen (Python, Java, C, JS …)</td><td>C/C++ (Arduino IDE)</td></tr>
+      <tr><td>Analoge Eingänge</td><td><b>keine</b> (braucht ADC)</td><td>6 analoge Pins eingebaut</td></tr>
+      <tr><td>Start / Echtzeit</td><td>bootet ~30 s, kein hartes Echtzeitverhalten</td><td>läuft sofort, sehr gutes Timing</td></tr>
+      <tr><td>Stromverbrauch</td><td>höher (mehrere Watt)</td><td>sehr gering</td></tr>
+    </table></div>
+    <div class="merk"><b>Prüfungsantwort „Vorteile Raspberry Pi“:</b> vollständiges Betriebssystem mit
+    Multitasking, deutlich mehr Rechenleistung/RAM, Netzwerk integriert, freie Sprachwahl, kann selbst
+    Dienste hosten (MQTT-Broker, Webserver, Docker, Datenbank), viele Schnittstellen (HDMI, USB, Kamera).</div>
+    <div class="merk"><b>Wofür Arduino besser ist:</b> Echtzeit-Steuerung, analoge Sensoren direkt einlesen,
+    sofortiger Start, minimaler Stromverbrauch. <b>In der Praxis kombiniert man beide:</b> Arduino misst,
+    der Pi verarbeitet, speichert und visualisiert.</div>
+  </div>
+
+  <div class="card">
+    <h3>Verbindungsarten Pi ↔ Arduino</h3>
+    <div class="tablewrap"><table>
+      <tr><th>Verbindung</th><th>Beschreibung</th></tr>
+      <tr><td><b>USB (seriell)</b></td><td>einfachste Variante: Arduino per USB-Kabel an den Pi, Kommunikation über die serielle Schnittstelle (z. B. <code>/dev/ttyACM0</code>)</td></tr>
+      <tr><td><b>UART über GPIO</b></td><td>TX/RX-Pins direkt verbinden (gekreuzt: TX→RX) + gemeinsame Masse (GND)</td></tr>
+      <tr><td><b>I2C</b></td><td>Bus mit Master (Pi) und Slaves (Arduinos), 2 Leitungen SDA/SCL</td></tr>
+      <tr><td><b>SPI</b></td><td>schneller Bus, 4 Leitungen</td></tr>
+      <tr><td><b>Netzwerk / Funk</b></td><td>z. B. MQTT über WLAN/LAN (Arduino mit WiFi-Modul), Bluetooth, nRF24</td></tr>
+    </table></div>
+    <div class="warn"><b>Achtung Pegel!</b> Der Pi arbeitet mit <b>3,3 V</b>, der Arduino mit <b>5 V</b>.
+    Bei direkter GPIO-Verbindung (UART/I2C/SPI) braucht die Leitung Arduino-TX → Pi-RX einen
+    <b>Pegelwandler</b> (oder Spannungsteiler), sonst kann der Pi beschädigt werden.</div>
+  </div>
+</section>
+
+<!-- ================= 5 DOCKER ================= -->
+<section id="docker">
+  <div class="sec-head"><span class="num">05</span><h2>Docker</h2></div>
+  <p class="sec-sub">Container vs. Virtualisierung · Image, Container, Volume · Port-Mapping · imperativ vs. deklarativ</p>
+
+  <div class="card">
+    <h3>Container vs. klassische Virtualisierung</h3>
+    <div class="stacks">
+      <div class="stack">
+        <div class="stack-title">Virtuelle Maschinen</div>
+        <div class="layer split"><span>App A<small>Gast-OS A</small></span><span>App B<small>Gast-OS B</small></span></div>
+        <div class="layer">Hypervisor</div>
+        <div class="layer dim">Host-Betriebssystem</div>
+        <div class="layer dim">Hardware</div>
+      </div>
+      <div class="stack">
+        <div class="stack-title">Docker-Container</div>
+        <div class="layer split"><span>App A<small>Libs</small></span><span>App B<small>Libs</small></span></div>
+        <div class="layer">Docker Engine</div>
+        <div class="layer dim">Host-Betriebssystem (gemeinsamer <b>Kernel</b>)</div>
+        <div class="layer dim">Hardware</div>
+      </div>
+    </div>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>VM</th><th>Container</th></tr>
+      <tr><td>Gast-OS</td><td>jede VM hat ein <b>komplettes eigenes OS</b></td><td><b>kein</b> eigenes OS – teilen den <b>Host-Kernel</b></td></tr>
+      <tr><td>Größe</td><td>GB</td><td>MB</td></tr>
+      <tr><td>Start</td><td>Minuten</td><td>Sekunden</td></tr>
+      <tr><td>Ressourcen</td><td>hoch (RAM/CPU pro Gast-OS)</td><td>gering → viele Container pro Host</td></tr>
+      <tr><td>Isolation</td><td>stärker (eigener Kernel)</td><td>Prozess-Isolation, etwas schwächer</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h3>Image · Container · Volume</h3>
+    <ul>
+      <li><b>Image:</b> unveränderliche <b>Vorlage</b> aus read-only Schichten (Layern) – wie ein Bauplan/Klassendefinition. Quelle: Docker Hub oder eigenes <code>Dockerfile</code>.</li>
+      <li><b>Container:</b> <b>laufende Instanz</b> eines Images + eine dünne <b>Schreibschicht</b> obendrauf. Aus einem Image können beliebig viele Container gestartet werden.</li>
+      <li><b>Volume:</b> <b>persistenter Speicher</b> außerhalb des Containers – Daten überleben das Löschen/Neuerstellen des Containers (z. B. für Datenbanken).</li>
+    </ul>
+    <div class="warn"><b>Wichtig:</b> Ohne Volume sind alle Daten in der Schreibschicht
+    <b>weg, sobald der Container gelöscht</b> wird.</div>
+    <pre class="term">docker run -v dbdaten:/var/lib/mysql mysql   <span class="c"># Volume "dbdaten" einbinden</span></pre>
+  </div>
+
+  <div class="card">
+    <h3>Port-Mapping</h3>
+    <div class="formula">-p HOST-Port:CONTAINER-Port</div>
+    <pre class="term">docker run -d -p 8080:80 nginx
+<span class="c"># nginx lauscht IM Container auf Port 80,</span>
+<span class="c"># erreichbar von außen über http://localhost:8080</span></pre>
+    <ul>
+      <li>Ohne <code>-p</code> ist der Dienst von außen <b>nicht</b> erreichbar.</li>
+      <li>Reihenfolge merken: <b>links Host, rechts Container</b> (häufiger Fehler!).</li>
+      <li>Mehrere Mappings möglich: <code>-p 8080:80 -p 8443:443</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Imperativ vs. deklarativ</h3>
+    <div class="tablewrap"><table>
+      <tr><th></th><th>Imperativ (CLI-Befehle)</th><th>Deklarativ (docker-compose.yml)</th></tr>
+      <tr><td>Idee</td><td>Schritt für Schritt Befehle: <code>docker run …</code></td><td>gewünschten <b>Zielzustand</b> in Datei beschreiben</td></tr>
+      <tr><td>Vorteile</td><td>schnell für Tests &amp; Ad-hoc, kein Setup</td><td><b>reproduzierbar</b>, versionierbar (Git), ideal für <b>Multi-Container</b>, selbstdokumentierend</td></tr>
+      <tr><td>Nachteile</td><td>schwer reproduzierbar, lange Befehle, fehleranfällig</td><td>etwas Einarbeitung, Datei pflegen</td></tr>
+      <tr><td>Start</td><td><code>docker run -d -p 8080:80 nginx</code></td><td><code>docker compose up -d</code></td></tr>
+    </table></div>
+    <details class="sol"><summary>Mini-Befehlsreferenz Docker</summary><div class="inner">
+      <pre class="term">docker pull nginx        <span class="c"># Image laden</span>
+docker images            <span class="c"># Images anzeigen</span>
+docker run -d --name web -p 8080:80 nginx
+docker ps                <span class="c"># laufende Container (-a: alle)</span>
+docker logs web          <span class="c"># Ausgaben ansehen</span>
+docker exec -it web bash <span class="c"># Shell im Container</span>
+docker stop web && docker rm web
+docker rmi nginx         <span class="c"># Image löschen</span>
+docker compose up -d     <span class="c"># compose-Setup starten</span>
+docker compose down      <span class="c"># und stoppen/aufräumen</span></pre>
+    </div></details>
+  </div>
+</section>
+
+<!-- ================= 6 SELBSTTEST ================= -->
+<section id="quiz">
+  <div class="sec-head"><span class="num">06</span><h2>Selbsttest</h2></div>
+  <p class="sec-sub">Erst selbst beantworten, dann aufklappen. Viel Erfolg am Montag! 💪</p>
+
+  <div class="card">
+    <h3>Elektrotechnik</h3>
+    <details><summary>1) Ein Widerstand von 120 Ω liegt an 12 V. Wie groß ist I?</summary><div class="inner">I = U/R = 12/120 = <b>0,1 A = 100 mA</b></div></details>
+    <details><summary>2) Welche Größe ist in der Reihenschaltung überall gleich?</summary><div class="inner">Der <b>Strom I</b>. Die Spannung teilt sich auf die Widerstände auf.</div></details>
+    <details><summary>3) Welche Größe ist in der Parallelschaltung überall gleich?</summary><div class="inner">Die <b>Spannung U</b>. Der Strom teilt sich auf die Zweige auf.</div></details>
+    <details><summary>4) Wie wird ein Voltmeter angeschlossen, und welchen Innenwiderstand soll es haben?</summary><div class="inner"><b>Parallel</b> zum Bauteil, Innenwiderstand <b>sehr hoch</b> (damit kein Strom abzweigt).</div></details>
+    <details><summary>5) Wie wird ein Amperemeter angeschlossen, und welchen Innenwiderstand soll es haben?</summary><div class="inner"><b>In Reihe</b> in den Stromkreis, Innenwiderstand <b>sehr klein</b> (damit es die Messung nicht verfälscht).</div></details>
+    <details><summary>6) LED mit U_LED = 2,1 V und 20 mA an 9 V: Vorwiderstand?</summary><div class="inner">R<sub>V</sub> = (9 − 2,1) / 0,02 = <b>345 Ω</b> → Normwert <b>390 Ω</b> (nächstgrößer).</div></details>
+    <details><summary>7) Warum braucht eine LED überhaupt einen Vorwiderstand?</summary><div class="inner">Ihre Kennlinie ist sehr steil – sie begrenzt den Strom selbst kaum. Ohne R<sub>V</sub> steigt I weit über den Nennstrom → <b>thermische Zerstörung</b>.</div></details>
+    <details><summary>8) Farbringe Braun–Schwarz–Rot–Gold = ?</summary><div class="inner">1, 0, × 100 = <b>1000 Ω = 1 kΩ</b>, Toleranz <b>± 5 %</b>.</div></details>
+    <details><summary>9) Wie zeigen U- und I-Pfeil am Verbraucher? Wohin zeigt der Spannungspfeil?</summary><div class="inner">Am Verbraucher in <b>dieselbe Richtung</b> (Verbraucherpfeilsystem); der Spannungspfeil zeigt von <b>+ nach −</b>.</div></details>
+    <details><summary>10) Knoten: zufließend 3 A und 2 A, abfließend 1,5 A und I. Wie groß ist I?</summary><div class="inner">Knotenregel: I = (3 + 2) − 1,5 = <b>3,5 A</b>.</div></details>
+  </div>
+
+  <div class="card">
+    <h3>MQTT</h3>
+    <details><summary>11) Nenne 3 Eigenschaften von MQTT.</summary><div class="inner">Leichtgewichtiges <b>Pub/Sub</b>-Protokoll über <b>TCP</b> (Ports 1883/8883 TLS), zentraler <b>Broker</b> vermittelt Topics; Features: QoS, Retain, Last Will; ideal für IoT/schwache Netze.</div></details>
+    <details><summary>12) Topic für Luftfeuchtigkeit in der Küche im OG?</summary><div class="inner">z. B. <code>haus/og/kueche/luftfeuchtigkeit</code> (hierarchisch grob → fein, klein geschrieben).</div></details>
+    <details><summary>13) Was matcht <code>haus/+/temperatur</code>?</summary><div class="inner">Genau <b>eine</b> Ebene zwischen haus und temperatur, z. B. <code>haus/eg/temperatur</code> – <b>nicht</b> <code>haus/eg/wz/temperatur</code>.</div></details>
+    <details><summary>14) Was matcht <code>haus/#</code>?</summary><div class="inner"><b>Alles unterhalb</b> von haus, beliebig viele Ebenen. <code>#</code> darf nur am Ende stehen.</div></details>
+    <details><summary>15) Wo darf man Wildcards verwenden?</summary><div class="inner">Nur beim <b>Subscribe</b> – beim Publish sind sie verboten.</div></details>
+    <details><summary>16) Welches QoS für sekündliche Außentemperatur? Welches für ein Türschloss?</summary><div class="inner">Außentemperatur: <b>QoS 0</b> (Verlust egal). Türschloss/Abrechnung: <b>QoS 2</b> (genau einmal).</div></details>
+    <details><summary>17) QoS 1: Welches Bestätigungspaket gibt es, und welches Problem kann auftreten?</summary><div class="inner"><b>PUBACK</b>. Geht es verloren, sendet der Publisher erneut → <b>Duplikate</b> möglich („mindestens einmal“).</div></details>
+    <details><summary>18) Wann sendet der Broker die Last-Will-Nachricht – und wann nicht?</summary><div class="inner">Bei <b>unsauberem Abbruch</b> (Keep-Alive-Timeout, Netzfehler). <b>Nicht</b> bei sauberem DISCONNECT. Hinterlegt wird sie beim CONNECT.</div></details>
+  </div>
+
+  <div class="card">
+    <h3>Linux</h3>
+    <details><summary>19) Alle .txt-Dateien im Home inkl. Unterordner finden?</summary><div class="inner"><code>find ~ -name "*.txt"</code></div></details>
+    <details><summary>20) Unterschied rmdir und rm -r?</summary><div class="inner"><code>rmdir</code> löscht nur <b>leere</b> Verzeichnisse, <code>rm -r</code> löscht rekursiv <b>mit Inhalt</b>.</div></details>
+    <details><summary>21) Was bedeutet <code>-rw-r--r--</code>?</summary><div class="inner">Normale Datei; <b>Besitzer:</b> lesen + schreiben, <b>Gruppe</b> und <b>Andere:</b> nur lesen.</div></details>
+    <details><summary>22) Ausgabe von <code>ls /etc</code> an datei.txt anhängen, ohne sie zu überschreiben?</summary><div class="inner"><code>ls /etc &gt;&gt; datei.txt</code> (doppeltes <code>&gt;&gt;</code> = anhängen).</div></details>
+    <details><summary>23) Wie zeigt man versteckte Dateien? Was bedeuten . und .. ?</summary><div class="inner"><code>ls -a</code>. <code>.</code> = aktuelles Verzeichnis, <code>..</code> = übergeordnetes Verzeichnis.</div></details>
+    <details><summary>24) In der man-Page von grep nach „recursive“ suchen?</summary><div class="inner"><code>man grep</code> öffnen → <code>/recursive</code> tippen → <b>n</b> für nächsten Treffer, <b>q</b> zum Beenden.</div></details>
+    <details><summary>25) Datei „Meine Notizen.txt“ mit less öffnen?</summary><div class="inner"><code>less "Meine Notizen.txt"</code> oder <code>less Meine\ Notizen.txt</code></div></details>
+    <details><summary>26) ssh: Standardport? Verbindung als pi auf 10.0.0.5?</summary><div class="inner">Port <b>22</b>; <code>ssh pi@10.0.0.5</code></div></details>
+    <details><summary>27) Was macht die Pipe <code>|</code>?</summary><div class="inner">Leitet die <b>Ausgabe</b> des linken Befehls als <b>Eingabe</b> an den rechten weiter, z. B. <code>ls /etc | grep conf</code>.</div></details>
+  </div>
+
+  <div class="card">
+    <h3>Raspberry Pi</h3>
+    <details><summary>28) Nenne 3 Vorteile des Raspberry Pi gegenüber dem Arduino.</summary><div class="inner">Vollständiges <b>Betriebssystem</b> mit Multitasking · viel mehr <b>Leistung/RAM</b> · <b>Netzwerk onboard</b> (außerdem: freie Sprachwahl, kann Dienste wie MQTT-Broker/Docker hosten).</div></details>
+    <details><summary>29) UART-Verbindung Pi ↔ Arduino über GPIO: Worauf achten?</summary><div class="inner"><b>Pegel:</b> Pi 3,3 V vs. Arduino 5 V → <b>Pegelwandler</b>/Spannungsteiler an Arduino-TX → Pi-RX; TX und RX <b>kreuzen</b>; gemeinsame <b>Masse (GND)</b> verbinden.</div></details>
+    <details><summary>30) Wofür ist der Arduino die bessere Wahl?</summary><div class="inner"><b>Echtzeit</b>-Aufgaben, <b>analoge Eingänge</b> direkt, sofortiger Start, sehr geringer <b>Stromverbrauch</b>.</div></details>
+  </div>
+
+  <div class="card">
+    <h3>Docker</h3>
+    <details><summary>31) Hauptunterschied Container vs. VM?</summary><div class="inner">Container haben <b>kein eigenes Gast-OS</b>, sondern teilen den <b>Host-Kernel</b> → klein (MB), Start in Sekunden, wenig Ressourcen. VMs: eigenes OS, stärkere Isolation, GB-groß.</div></details>
+    <details><summary>32) Unterschied Image und Container? Was passiert mit Daten ohne Volume?</summary><div class="inner"><b>Image</b> = unveränderliche Vorlage (Layer), <b>Container</b> = laufende Instanz mit Schreibschicht. Ohne <b>Volume</b> gehen die Daten beim Löschen des Containers <b>verloren</b>.</div></details>
+    <details><summary>33) <code>docker run -p 8080:80 nginx</code> – welcher Port gehört dem Host?</summary><div class="inner"><b>8080</b> (links = Host, rechts = Container). Aufruf: <code>http://localhost:8080</code></div></details>
+    <details><summary>34) Je ein Vorteil von imperativ und deklarativ?</summary><div class="inner"><b>Imperativ:</b> schnell für Ad-hoc-Tests. <b>Deklarativ:</b> reproduzierbar &amp; versionierbar, ideal für Multi-Container-Setups.</div></details>
+    <details><summary>35) Wie startet man ein in docker-compose.yml beschriebenes Setup?</summary><div class="inner"><code>docker compose up -d</code> (älter: <code>docker-compose up -d</code>); stoppen mit <code>docker compose down</code>.</div></details>
+  </div>
+
+  <div class="card">
+    <h3>Last-Minute-Checkliste ✅</h3>
+    <ul>
+      <li>U = R · I — immer erst in <b>Grundeinheiten</b> umrechnen (mA → A, kΩ → Ω).</li>
+      <li>Reihe: I gleich, U teilt sich · Parallel: U gleich, I teilt sich, R<sub>ges</sub> &lt; kleinster R.</li>
+      <li>Voltmeter <b>parallel/hochohmig</b>, Amperemeter <b>in Reihe/niederohmig</b>.</li>
+      <li>LED: R<sub>V</sub> = (U − U<sub>LED</sub>) / I, dann <b>nächstgrößeren Normwert</b> wählen.</li>
+      <li>MQTT-Wildcards <b>nur beim Subscribe</b>; <code>#</code> nur am Ende; <code>+</code> = eine Ebene.</li>
+      <li>QoS: 0 fire&amp;forget · 1 PUBACK + Duplikate möglich · 2 genau einmal (PUBREC/PUBREL/PUBCOMP).</li>
+      <li>Last Will: beim CONNECT hinterlegt, nur bei <b>unsauberem</b> Abbruch gesendet.</li>
+      <li><code>rmdir</code> nur leer · <code>rm -r</code> mit Inhalt · <code>&gt;</code> überschreibt, <code>&gt;&gt;</code> hängt an.</li>
+      <li>ls -l: 1. Zeichen = Typ, dann rwx für Besitzer/Gruppe/Andere.</li>
+      <li>Pi 3,3 V vs. Arduino 5 V → <b>Pegelwandler</b> bei GPIO-Verbindung.</li>
+      <li>Docker: <code>-p HOST:CONTAINER</code> · Container teilen den <b>Host-Kernel</b> · Volumes = persistente Daten.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  Lernzettel zur Schulaufgabe · Elektrotechnik, MQTT, Linux, Raspberry Pi, Docker ·
+  basiert auf deinen Arbeitsblättern + ergänzten Themen. Lösungen zum Aufklappen, druckbar über Strg+P.
+</footer>
+
+</div>
+<script>
+(function(){
+  var btn=document.getElementById('toggleAll');
+  var open=false;
+  btn.addEventListener('click',function(){
+    open=!open;
+    document.querySelectorAll('details').forEach(function(d){d.open=open;});
+    btn.textContent=open?'Alle Lösungen einklappen':'Alle Lösungen ausklappen';
+  });
+})();
+</script>
 </body>
 </html>
